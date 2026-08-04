@@ -100,6 +100,17 @@ See [SPIKE_RESULTS.md](SPIKE_RESULTS.md).
 
 **Exit:** Every acceptance item in V1 spec passes locally, and remaining failures/ideas are documented in Backlog.
 
+## Phase 7: BRAT beta packaging
+
+**Status:** Complete for `0.1.0`
+
+- Keep generated `main.js` out of Git history.
+- Run `npm run check` and inspect the production bundle and release assets.
+- Create a version-matched GitHub prerelease containing `main.js`, `manifest.json`, and `styles.css`.
+- Document BRAT installation, macOS-only support, OpenAI data flow, BYOK costs, and limitations.
+
+**Exit:** BRAT can install `kcverde/objest` from the `0.1.0` release and Obsidian loads the packaged plugin without Objest errors.
+
 ## Deliberately deferred
 
 Do not implement hierarchical chunking, extra languages, model selection, additional providers, output-language settings, arbitrary metadata, stale cleanup, tag provenance, preview mode, sidecars, batch/background processing, other formats, cross-platform support, or Community Plugins work during minimal v1.

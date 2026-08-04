@@ -43,6 +43,7 @@ Objest writes each per-PDF result to a native `[!objest]` callout immediately af
 ## Included in minimal v1
 
 - Personal use on macOS
+- Manual development or BRAT prerelease installation
 - Command-palette invocation
 - Direct local PDF embeds only
 - Whole-PDF text extraction with bundled PDF.js

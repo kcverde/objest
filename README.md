@@ -17,9 +17,19 @@ Objest's minimal end-to-end v1 is implemented and covered by offline tests. Loca
 
 Every invocation reprocesses the embedded PDFs and may incur OpenAI charges. Existing user tags and content outside Objest-owned callouts are preserved. New output uses native callouts rather than HTML marker comments; exact legacy marker sections are migrated on the next successful write.
 
+## Install with BRAT
+
+Objest is available as a macOS desktop beta through [BRAT](https://github.com/TfTHacker/obsidian42-brat):
+
+1. Install and enable BRAT 1.1.0 or newer.
+2. Run **BRAT: Add a beta plugin for testing**.
+3. Enter `kcverde/objest`, track the latest release, and enable Objest.
+
+BRAT installs the release's `main.js`, `manifest.json`, and `styles.css`. Objest is not submitted to the Community Plugins directory.
+
 ## Setup and first test
 
-1. Build with `npm install && npm run build` and reload Objest in the designated macOS development vault.
+1. Install through BRAT, or build with `npm install && npm run build` and reload Objest in the designated macOS development vault.
 2. In Obsidian settings, open **Objest** and select an existing SecretStorage entry containing an OpenAI API key. The key value is not saved in Objest's `data.json`.
 3. Use a disposable note with a synthetic or non-sensitive directly embedded PDF.
 4. Run **Objest: Analyze embedded PDFs**.
@@ -60,3 +70,5 @@ npm run check     # format, lint, types, tests, and production build
 ```
 
 Normal tests use fake providers and make no network requests. The separate `npm run test:live:openai` command is opt-in, requires `OPENAI_API_KEY`, uses synthetic text, and must never run as part of `npm run check`.
+
+BRAT releases are created from a passing production build. The release tag, release name, and `manifest.json` version must match, and the release assets must include `main.js`, `manifest.json`, and `styles.css`. Generated `main.js` remains untracked.

@@ -58,6 +58,7 @@ This file records product and architecture decisions in the order they are discu
 | D043 | Fixed schema field limits             | Accepted   | Conservative bounded core fields and deterministic tag normalization    |
 | D044 | Marker parsing and operation timeouts | Superseded | Legacy marker grammar replaced by D045; fixed timeouts retained         |
 | D045 | Document titles and owned output      | Accepted   | AI titles in native owned callouts; no new HTML marker comments         |
+| D046 | BRAT beta distribution                | Accepted   | Publish version-matched prerelease assets; no Community submission      |
 
 ---
 
@@ -1205,3 +1206,27 @@ On the next successful write, convert an exact D044 legacy section and all of it
 - Duplicate sources, malformed callouts, and Objest callouts outside the contiguous top-of-body region fail before body or tag writes.
 - The `[!objest]` callout type is an explicit visible ownership signal. User-authored content must not use that reserved callout type unless it is intended to be managed by Objest.
 - D045 supersedes D019/D042/D044 where they require hidden HTML markers, a generic `## Objest` heading, or a fixed core schema without a document title; it extends D043 with the 120-character single-line title bound. Top-of-body placement, idempotence, fail-closed writes, independent attachment handling, and D044's operation deadlines remain accepted.
+
+---
+
+## D046: BRAT beta distribution
+
+**Status:** Accepted
+
+### Context
+
+The owner wants to install and update the working personal macOS build through BRAT rather than relying only on a local development-plugin folder. Current BRAT versions install Obsidian plugins from GitHub release assets, while Objest intentionally keeps generated `main.js` out of Git history.
+
+### Decision
+
+Publish Objest as a GitHub prerelease compatible with BRAT 1.1.0 or newer. Each release tag, release name, and packaged `manifest.json` version must match exactly. Attach the production-built `main.js`, `manifest.json`, and `styles.css` directly to the release. Keep generated `main.js` untracked in the repository.
+
+The initial BRAT release is `0.1.0`. BRAT distribution does not constitute submission to Obsidian's Community Plugins directory and does not expand minimal v1 beyond personal macOS desktop use.
+
+### Consequences
+
+- Users may add `kcverde/objest` through BRAT and track the latest release.
+- Every release requires `npm run check`, production-bundle inspection, release-asset inspection, and confirmation that no secrets or document content are included.
+- Release notes must restate the macOS-only target, OpenAI BYOK requirement, cloud text data flow, and repeated-run cost behavior.
+- Generated bundles remain absent from normal commits; GitHub release assets are the distribution boundary.
+- Release automation, public distribution policy work, and Community Plugins submission remain backlog items.

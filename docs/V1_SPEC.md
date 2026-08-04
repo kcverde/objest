@@ -13,11 +13,11 @@ From a Markdown note in Kevin's macOS Obsidian vault, run one command that analy
 - Personal use
 - macOS only
 - Current local Obsidian installation
-- Manual development installation; no Community Plugins submission requirement
+- Manual development installation or BRAT prerelease installation; no Community Plugins submission requirement
 - PDF only
 - English OCR and English generated output only
 
-Objest may be portable internally, but v1 is accepted when it works reliably in the designated macOS development vault.
+Objest may be portable internally, but v1 is accepted when it works reliably in the designated macOS development vault. BRAT distribution uses version-matched GitHub release assets containing `main.js`, `manifest.json`, and `styles.css`; it does not expand the supported platform or feature scope.
 
 ## User flow
 
