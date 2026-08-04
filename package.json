@@ -1,0 +1,47 @@
+{
+	"name": "objest",
+	"version": "0.1.0",
+	"description": "Obsidian plugin that analyzes embedded PDFs and enriches notes with AI-generated summaries and metadata.",
+	"main": "main.js",
+	"type": "module",
+	"scripts": {
+		"dev": "node esbuild.config.mjs",
+		"build": "npm run typecheck && node esbuild.config.mjs production",
+		"typecheck": "tsc --noEmit",
+		"lint": "eslint .",
+		"format": "prettier --write .",
+		"format:check": "prettier --check .",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"check": "npm run format:check && npm run lint && npm run typecheck && npm test && npm run build",
+		"version": "node version-bump.mjs && git add manifest.json versions.json"
+	},
+	"keywords": [
+		"obsidian",
+		"pdf",
+		"ocr",
+		"openai"
+	],
+	"license": "MIT",
+	"dependencies": {
+		"@tesseract.js-data/eng": "1.0.0",
+		"pdfjs-dist": "6.2.108",
+		"tesseract.js": "7.0.0",
+		"tesseract.js-core": "7.0.0",
+		"zod": "4.4.3"
+	},
+	"devDependencies": {
+		"@eslint/js": "^9.39.4",
+		"@types/node": "^24.0.0",
+		"esbuild": "0.25.5",
+		"eslint": "^9.39.4",
+		"eslint-plugin-obsidianmd": "^0.4.0",
+		"globals": "^17.6.1",
+		"jiti": "^2.6.1",
+		"obsidian": "latest",
+		"prettier": "^3.8.2",
+		"typescript": "^5.8.3",
+		"typescript-eslint": "^8.65.0",
+		"vitest": "^4.1.10"
+	}
+}

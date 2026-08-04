@@ -1,0 +1,25 @@
+# Editors
+.vscode/
+.idea/
+*.iml
+
+# Dependencies and generated output
+node_modules/
+main.js
+*.map
+coverage/
+
+# Obsidian plugin state
+data.json
+
+# Local test artifacts
+.tmp/
+test-results/
+*.traineddata
+*.traineddata.gz
+
+# Environment and OS
+.env
+.env.*
+!.env.example
+.DS_Store

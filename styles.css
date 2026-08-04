@@ -1,0 +1,21 @@
+.objest-status {
+	font-weight: var(--font-semibold);
+}
+
+.objest-results {
+	display: grid;
+	gap: var(--size-4-2);
+	margin-block: var(--size-4-3);
+}
+
+.objest-result {
+	background: var(--background-secondary);
+	border-radius: var(--radius-s);
+	padding: var(--size-4-3);
+}
+
+.objest-actions {
+	display: flex;
+	justify-content: flex-end;
+	margin-top: var(--size-4-4);
+}
