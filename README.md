@@ -4,9 +4,9 @@
 
 ## Status
 
-Objest is a small personal project in early implementation. The TypeScript/npm/esbuild scaffold is working, and the PDF.js/Tesseract.js extraction spike has passed on macOS with Obsidian 1.13.4. The minimal v1 is defined in [docs/V1_SPEC.md](docs/V1_SPEC.md); excluded ideas are in [docs/BACKLOG.md](docs/BACKLOG.md).
+Objest's minimal end-to-end v1 is implemented and covered by offline tests. Local PDF/OCR compatibility has passed in Obsidian on macOS, and the owner has successfully exercised the connected OpenAI analysis and note-write flow in the development vault. The minimal v1 is defined in [docs/V1_SPEC.md](docs/V1_SPEC.md); excluded ideas are in [docs/BACKLOG.md](docs/BACKLOG.md).
 
-## Planned v1 workflow
+## V1 workflow
 
 1. Invoke **Objest: Analyze embedded PDFs** from the command palette.
 2. Discover unique local PDFs directly embedded in the active note.
@@ -15,7 +15,18 @@ Objest is a small personal project in early implementation. The TypeScript/npm/e
 5. Send only bounded normalized document text—not the source PDF, filename, path, or unrelated vault content—to OpenAI using the user's own API key.
 6. Validate the response, merge generated tags into the note's existing `tags`, and automatically update a marked `## Objest` section at the top of the note body.
 
-Every invocation reprocesses the embedded PDFs. Existing user tags and content outside Objest's managed markers are preserved.
+Every invocation reprocesses the embedded PDFs and may incur OpenAI charges. Existing user tags and content outside Objest's managed markers are preserved.
+
+## Setup and first test
+
+1. Build with `npm install && npm run build` and reload Objest in the designated macOS development vault.
+2. In Obsidian settings, open **Objest** and select an existing SecretStorage entry containing an OpenAI API key. The key value is not saved in Objest's `data.json`.
+3. Use a disposable note with a synthetic or non-sensitive directly embedded PDF.
+4. Run **Objest: Analyze embedded PDFs**.
+5. Review the OpenAI disclosure. Cancelling performs no extraction, request, or write; accepting stores only the consent version.
+6. For the first live run, use a small text PDF and verify the `## Objest` section and additive frontmatter tags. Then rerun and confirm the existing attachment entry is replaced rather than duplicated.
+
+The fixed model is `gpt-5.6-luna`. Its availability, cost, and output quality depend on the user's OpenAI account and current OpenAI service. Do not use private documents for the first live verification.
 
 ## Privacy summary
 
@@ -48,4 +59,4 @@ npm run dev       # watch build
 npm run check     # format, lint, types, tests, and production build
 ```
 
-The current development-only command is **Objest: Run PDF and OCR compatibility check**. It does not call OpenAI or write generated analysis.
+Normal tests use fake providers and make no network requests. The separate `npm run test:live:openai` command is opt-in, requires `OPENAI_API_KEY`, uses synthetic text, and must never run as part of `npm run check`.

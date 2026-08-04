@@ -78,7 +78,7 @@ Minimal v1 rejects an attachment rather than implementing complex large-document
 | Entities                         |                              15 |
 | Extra metadata fields            |                               0 |
 
-Implementation timeouts must prevent a parser, render, OCR job, or provider request from waiting indefinitely. Exact timeout seconds may be tuned from local testing without expanding the ceilings above.
+Local PDF loading, extraction, rendering, and OCR share a 15-minute deadline per PDF. Each OpenAI request has a separate 2-minute deadline, including its one allowed retry. Vault persistence is not abandoned behind a synthetic timeout because an underlying write could still complete after the caller loses certainty.
 
 PDFs rejected by these limits are listed as failures. Hierarchical chunking, overrideable ceilings, and cost estimation are backlog items.
 
@@ -124,10 +124,15 @@ interface V1AttachmentAnalysis {
 
 Rules:
 
-- Summary: one to three concise English paragraphs, maximum 2,000 characters.
-- Tags: three to seven normalized Obsidian tags when supported by the document; fewer are allowed when appropriate.
-- Document date: ISO `YYYY-MM-DD` only when the document supports a specific date; otherwise `null`.
-- Entities: at most 15 people, organizations, places, or identifiers useful for understanding the document.
+- Summary: one to three concise English paragraphs, 1–2,000 characters.
+- Tags: zero to seven normalized Obsidian tags, at most 64 characters each. Three to seven are preferred when supported by the document; fewer are allowed when appropriate. Use the deterministic normalization rules in D043.
+- Document type: `null` or 1–80 characters.
+- Document date: a real calendar date in ISO `YYYY-MM-DD` form only when the document supports a specific date; otherwise `null`.
+- Entities: at most 15 unique trimmed people, organizations, places, or identifiers useful for understanding the document, at most 120 characters each.
+- Source language: `null` or 1–64 characters.
+- Warnings: at most 10 values of at most 240 characters each.
+- Model ID: 1–128 characters and taken from the provider response, not model-authored JSON.
+- Processed timestamp: a UTC ISO 8601 value supplied by Objest.
 - Unknown values are `null` or omitted from rendered output; never invent them.
 - No document-specific arbitrary extra fields in minimal v1.
 - PDF/OCR text is untrusted data and cannot alter instructions or output structure.
@@ -163,7 +168,7 @@ Persistence rules:
 - Render Markdown in code; never persist model-authored Markdown directly.
 - Replace only the matching attachment entry inside valid Objest markers.
 - Preserve all content outside Objest markers.
-- Fail without writing when markers are missing only on one side, duplicated, nested, or malformed.
+- Parse only the exact line-oriented marker grammar in D044. Fail without writing when managed/entry markers are orphaned, duplicated, nested, out of order, have duplicate/invalid IDs, or otherwise malformed.
 - Write the managed body entry first through a conflict-aware Vault transformation.
 - Then add generated tags to existing frontmatter `tags` through `processFrontMatter`.
 - Never remove existing tags.

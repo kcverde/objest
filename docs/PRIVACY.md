@@ -28,7 +28,7 @@ One bounded request per accepted PDF contains only:
 - Fixed versioned analysis instructions
 - Fixed versioned structured-output schema
 
-Every request uses `store: false` and fixed `gpt-5.6-luna`.
+Every request uses `store: false` and fixed `gpt-5.6-luna`. `store: false` disables Responses application-state storage, but it is not a promise of zero provider retention: OpenAI may retain request/response data in abuse-monitoring logs according to the account's eligibility, controls, and current OpenAI policy.
 
 ## Not sent
 
@@ -73,7 +73,7 @@ Intermediates exist only in memory for the current attachment and are released a
 
 ## API key
 
-Objest requires Obsidian 1.11.4 or newer and uses `SecretStorage`/`SecretComponent`. Ordinary plugin `data.json` stores only the selected secret identifier, never the key value. The key must not appear in prompts, notes, logs, errors, fixtures, screenshots, or telemetry.
+Objest requires Obsidian 1.11.4 or newer and uses `SecretStorage`/`SecretComponent`. Ordinary plugin `data.json` stores only the selected secret identifier, never the key value. Because the user-owned key is used directly from Obsidian's local desktop renderer, another process or plugin with access to that local runtime could inspect it; this personal BYOK design is not suitable for an untrusted web page. The key must not appear in prompts, notes, logs, errors, fixtures, screenshots, or telemetry.
 
 ## Consent
 
@@ -93,4 +93,4 @@ Production diagnostics may include stage, counts, timing, redacted error categor
 
 ## Third party
 
-OpenAI receives the allowed normalized analysis input under the user's OpenAI account and applicable terms. Before first use, documentation should link to current OpenAI privacy/data-usage information. Minimal v1 has no telemetry and no other runtime network destination.
+OpenAI receives the allowed normalized analysis input under the user's OpenAI account and applicable terms. Before first use, documentation should link to current OpenAI privacy and [API data controls](https://platform.openai.com/docs/models/default-usage-policies-by-endpoint). Minimal v1 has no telemetry and no other runtime network destination.

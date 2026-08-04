@@ -1,4 +1,4 @@
-const MIN_USABLE_NON_WHITESPACE_CHARACTERS = 32;
+import { MIN_USABLE_NON_WHITESPACE_CHARACTERS } from '../domain/v1-constants';
 
 export function normalizeExtractedText(value: string): string {
 	return value

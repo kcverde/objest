@@ -1,6 +1,7 @@
 import bundledEnglish from '@tesseract.js-data/eng/4.0.0_best_int/eng.traineddata.gz';
 import tesseractCoreSource from 'tesseract.js-core/tesseract-core-lstm.wasm.js';
 import tesseractWorkerSource from 'tesseract.js/dist/worker.min.js';
+import { V1_OCR_LANGUAGE } from '../domain/v1-constants';
 import type { OcrEngine } from './pdf-extractor';
 
 const LSTM_ONLY_OEM = 1;
@@ -24,18 +25,26 @@ type WorkerMessage = {
 	status: 'progress' | 'reject' | 'resolve';
 };
 
+type OcrWorker = Pick<
+	Worker,
+	'onerror' | 'onmessage' | 'postMessage' | 'terminate'
+>;
+
+type OcrWorkerFactory = (scriptUrl: string) => OcrWorker;
+
 export class TesseractOcrEngine implements OcrEngine {
 	private readonly coreBaseUrl: string;
 	private readonly coreUrl: string;
 	private jobSequence = 0;
 	private readonly pending = new Map<string, PendingJob>();
-	private worker: Worker | null = null;
+	private worker: OcrWorker | null = null;
 	private workerReady: Promise<void> | null = null;
 	private readonly workerScriptUrl: string;
 
 	constructor(
-		private readonly languages: string[],
 		private readonly onProgress?: OcrProgressCallback,
+		private readonly createWorker: OcrWorkerFactory = (scriptUrl) =>
+			new Worker(scriptUrl),
 	) {
 		this.workerScriptUrl = createScriptUrl(tesseractWorkerSource);
 		this.coreBaseUrl = createScriptUrl(tesseractCoreSource);
@@ -66,10 +75,7 @@ export class TesseractOcrEngine implements OcrEngine {
 	}
 
 	async dispose(): Promise<void> {
-		this.worker?.terminate();
-		this.worker = null;
-		this.workerReady = null;
-		this.rejectPending(
+		this.resetWorker(
 			new DOMException('OCR worker disposed.', 'AbortError'),
 		);
 		URL.revokeObjectURL(this.workerScriptUrl);
@@ -77,13 +83,22 @@ export class TesseractOcrEngine implements OcrEngine {
 	}
 
 	private initialize(signal: AbortSignal): Promise<void> {
-		this.workerReady ??= this.initializeWorker(signal);
+		if (!this.workerReady) {
+			const ready = this.initializeWorker(signal);
+			this.workerReady = ready;
+			void ready.catch((error: unknown) => {
+				if (this.workerReady === ready) {
+					this.resetWorker(asError(error));
+				}
+			});
+		}
 		return this.workerReady;
 	}
 
 	private async initializeWorker(signal: AbortSignal): Promise<void> {
-		this.worker = new Worker(this.workerScriptUrl);
-		this.worker.onmessage = (event: MessageEvent<WorkerMessage>) => {
+		const worker = this.createWorker(this.workerScriptUrl);
+		this.worker = worker;
+		worker.onmessage = (event: MessageEvent<WorkerMessage>) => {
 			const message = event.data;
 			if (message.status === 'progress') {
 				this.onProgress?.(
@@ -100,8 +115,9 @@ export class TesseractOcrEngine implements OcrEngine {
 			if (message.status === 'resolve') pending.resolve(message.data);
 			else pending.reject(new Error(workerErrorMessage(message.data)));
 		};
-		this.worker.onerror = (event) => {
-			this.rejectPending(
+		worker.onerror = (event) => {
+			if (this.worker !== worker) return;
+			this.resetWorker(
 				new Error(
 					event.message || 'The Tesseract worker failed to start.',
 				),
@@ -122,13 +138,9 @@ export class TesseractOcrEngine implements OcrEngine {
 		await this.send(
 			'loadLanguage',
 			{
-				langs: this.languages.map((language) =>
-					language === 'eng'
-						? { code: 'eng', data: bundledEnglish }
-						: language,
-				),
+				langs: [{ code: V1_OCR_LANGUAGE, data: bundledEnglish }],
 				options: {
-					cacheMethod: 'write',
+					cacheMethod: 'none',
 					gzip: true,
 					lstmOnly: true,
 				},
@@ -139,7 +151,7 @@ export class TesseractOcrEngine implements OcrEngine {
 			'initialize',
 			{
 				config: {},
-				langs: this.languages,
+				langs: [V1_OCR_LANGUAGE],
 				oem: LSTM_ONLY_OEM,
 			},
 			signal,
@@ -160,9 +172,12 @@ export class TesseractOcrEngine implements OcrEngine {
 		return new Promise<T>((resolve, reject) => {
 			const onAbort = () => {
 				this.pending.delete(jobId);
-				this.worker?.terminate();
-				this.worker = null;
-				reject(new DOMException('OCR was cancelled.', 'AbortError'));
+				const error = new DOMException(
+					'OCR was cancelled.',
+					'AbortError',
+				);
+				this.resetWorker(error);
+				reject(error);
 			};
 			signal.addEventListener('abort', onAbort, { once: true });
 
@@ -191,6 +206,14 @@ export class TesseractOcrEngine implements OcrEngine {
 				transfer,
 			);
 		});
+	}
+
+	private resetWorker(error: Error): void {
+		const worker = this.worker;
+		this.worker = null;
+		this.workerReady = null;
+		worker?.terminate();
+		this.rejectPending(error);
 	}
 
 	private rejectPending(error: Error): void {
@@ -227,6 +250,12 @@ function workerErrorMessage(value: unknown): string {
 	if (typeof value === 'string') return value;
 	if (value instanceof Error) return value.message;
 	return 'The Tesseract worker rejected an OCR operation.';
+}
+
+function asError(value: unknown): Error {
+	return value instanceof Error
+		? value
+		: new Error(workerErrorMessage(value));
 }
 
 function throwIfAborted(signal: AbortSignal): void {

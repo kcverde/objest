@@ -12,7 +12,8 @@ coverage/
 # Obsidian plugin state
 data.json
 
-# Local test artifacts
+# Local test and agent artifacts
+.pi-subagents/
 .tmp/
 test-results/
 *.traineddata

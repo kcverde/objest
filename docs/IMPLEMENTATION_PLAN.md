@@ -8,13 +8,15 @@ Implement only [V1_SPEC.md](V1_SPEC.md). Put useful additions in [BACKLOG.md](BA
 
 - Repository/npm/esbuild scaffold: **complete**
 - macOS PDF.js/Tesseract extraction spike: **complete**
-- AI analysis: **not started**
-- Managed note persistence: **not started**
-- End-to-end personal v1: **not started**
+- Fixed analysis schema/prompt and offline-tested OpenAI adapter: **complete and connected**
+- Managed note persistence: **complete offline**
+- End-to-end personal v1: **implemented; owner-reported live OpenAI/write test passed on macOS**
 
 See [SPIKE_RESULTS.md](SPIKE_RESULTS.md).
 
 ## Phase 1: Simplify scaffold to v1
+
+**Status:** Complete
 
 - Remove/hide settings for OCR languages, model override, and cost thresholds.
 - Keep only selected OpenAI secret and versioned consent state.
@@ -25,6 +27,8 @@ See [SPIKE_RESULTS.md](SPIKE_RESULTS.md).
 **Exit:** The settings and public command surface promise no backlog capability.
 
 ## Phase 2: Fixed domain and OpenAI analysis
+
+**Status:** Complete; offline contract tests pass and the connected flow has an owner-reported live pass. The separate opt-in live test script has not been run.
 
 - Add the exact `V1AttachmentAnalysis` Zod schema and TypeScript inference.
 - Enforce field counts/lengths from V1 spec.
@@ -40,6 +44,8 @@ See [SPIKE_RESULTS.md](SPIKE_RESULTS.md).
 
 ## Phase 3: Minimal discovery/extraction orchestration
 
+**Status:** Complete offline
+
 - Keep direct-embed discovery through Obsidian APIs.
 - Enforce 5-PDF, 25 MiB, 50-page, 16-million-pixel, and 150,000-character ceilings.
 - Add explicit PDF render, OCR, and provider timeouts.
@@ -51,6 +57,8 @@ See [SPIKE_RESULTS.md](SPIKE_RESULTS.md).
 **Exit:** Synthetic text, scan, empty, malformed, and over-limit fixtures produce deterministic bounded outcomes.
 
 ## Phase 4: Deterministic rendering and safe writes
+
+**Status:** Complete offline
 
 - Implement exact managed/entry markers from V1 spec.
 - Encode attachment path identity as base64url for marker IDs.
@@ -67,6 +75,8 @@ See [SPIKE_RESULTS.md](SPIKE_RESULTS.md).
 
 ## Phase 5: Minimal command, consent, and modal
 
+**Status:** Complete; Obsidian command/consent smoke passed and the owner reported a successful live provider/write run
+
 - Add **Objest: Analyze embedded PDFs**.
 - Add one-time versioned OpenAI disclosure before the first provider request.
 - Show current attachment, current stage, Cancel, and final counts.
@@ -77,6 +87,8 @@ See [SPIKE_RESULTS.md](SPIKE_RESULTS.md).
 **Exit:** The complete user flow works in the designated macOS test vault.
 
 ## Phase 6: Personal v1 verification
+
+**Status:** Core end-to-end path passed by owner; broader failure/cancellation matrix remains
 
 - Run `npm run check`.
 - Inspect production bundle size and contents.

@@ -11,50 +11,52 @@ This file records product and architecture decisions in the order they are discu
 
 ## Decision sequence
 
-| ID   | Topic                                | Status     | Decision                                                                |
-| ---- | ------------------------------------ | ---------- | ----------------------------------------------------------------------- |
-| D001 | Privacy and processing boundary      | Accepted   | Local extraction/OCR with BYOK cloud AI                                 |
-| D002 | AI provider strategy                 | Accepted   | Pluggable provider interface; OpenAI adapter first                      |
-| D003 | OCR and PDF extraction strategy      | Accepted   | PDF.js text extraction with Tesseract.js OCR fallback                   |
-| D004 | Supported Obsidian platforms         | Superseded | Personal macOS-only v1 under D042                                       |
-| D005 | Attachment discovery semantics       | Accepted   | Direct local embeds only                                                |
-| D006 | Generated output location            | Accepted   | Active-note tags plus managed per-attachment section                    |
-| D007 | Metadata schema                      | Superseded | Fixed core only in minimal v1 under D042                                |
-| D008 | Review and write behavior            | Accepted   | Automatically write validated results after explicit command invocation |
-| D009 | Reprocessing and cache policy        | Accepted   | Always reprocess embedded attachments when invoked                      |
-| D010 | Credential storage                   | Accepted   | Obsidian SecretStorage; minimum app version 1.11.4                      |
-| D011 | Error, progress, and cancellation UX | Accepted   | Cancellable per-attachment progress modal                               |
-| D012 | Plugin name and identifier           | Accepted   | Objest (`objest`)                                                       |
-| D013 | Model selection strategy             | Superseded | Fixed `gpt-5.6-luna` in minimal v1 under D042                           |
-| D014 | Default model profile                | Accepted   | Balanced compact model; pin exact ID during implementation              |
-| D015 | OCR language policy                  | Superseded | English only in minimal v1 under D042                                   |
-| D016 | PDF embed page scope                 | Accepted   | Analyze the entire resolved PDF                                         |
-| D017 | Large-document strategy              | Superseded | Reject above simple v1 limits under D042                                |
-| D018 | Attachment concurrency               | Accepted   | Process one attachment at a time                                        |
-| D019 | Managed-section placement            | Accepted   | Top of note immediately after properties                                |
-| D020 | Generated tag storage                | Accepted   | Additive merge into standard `tags` property                            |
-| D021 | Core metadata properties             | Accepted   | Tags only in frontmatter; all other metadata in managed section         |
-| D022 | Supported attachment formats         | Accepted   | PDF only                                                                |
-| D023 | Plugin scaffold and build tooling    | Accepted   | Official sample conventions with npm, TypeScript, and esbuild           |
-| D024 | Source citation policy               | Accepted   | Do not render page citations in generated output                        |
-| D025 | Summary presentation                 | Accepted   | Concise paragraphs followed by readable metadata                        |
-| D026 | Distribution target                  | Superseded | Small personal project under D042                                       |
-| D027 | Project license                      | Accepted   | MIT License                                                             |
-| D028 | Cost and size guardrails             | Superseded | Fixed rejection limits; no cost estimator under D042                    |
-| D029 | Network privacy consent              | Accepted   | One-time disclosure before the first OpenAI request                     |
-| D030 | Local content retention              | Accepted   | No persistent document-content cache                                    |
-| D031 | OCR asset distribution               | Accepted   | Bundle executable assets and English; download additional languages     |
-| D032 | Stale managed entries                | Superseded | Leave old entries unchanged in minimal v1 under D042                    |
-| D033 | Write consistency and edit conflicts | Accepted   | Conflict-checked body update first, then additive frontmatter tags      |
-| D034 | OpenAI request privacy controls      | Accepted   | No filename/path; disable provider-side response storage                |
-| D035 | Cancellation/write boundary          | Accepted   | Abort processing promptly; finish an already-started write commit       |
-| D036 | Hard resource limits                 | Accepted   | Non-bypassable safety ceilings; users may only lower thresholds         |
-| D037 | Generated-tag provenance             | Superseded | Additive tags without ownership tracking under D042                     |
-| D038 | OpenAI API and transport             | Accepted   | Official OpenAI SDK with Responses API and structured outputs           |
-| D039 | Concrete default OpenAI model        | Accepted   | `gpt-5.6-luna`                                                          |
-| D040 | Analysis output language             | Superseded | English only in minimal v1 under D042                                   |
-| D041 | Prompt customization                 | Accepted   | One fixed, versioned prompt contract; no custom instructions in v1      |
-| D042 | Minimal personal v1 scope            | Accepted   | macOS-only, fixed English, fixed model, bounded single-request pipeline |
+| ID   | Topic                                 | Status     | Decision                                                                |
+| ---- | ------------------------------------- | ---------- | ----------------------------------------------------------------------- |
+| D001 | Privacy and processing boundary       | Accepted   | Local extraction/OCR with BYOK cloud AI                                 |
+| D002 | AI provider strategy                  | Accepted   | Pluggable provider interface; OpenAI adapter first                      |
+| D003 | OCR and PDF extraction strategy       | Accepted   | PDF.js text extraction with Tesseract.js OCR fallback                   |
+| D004 | Supported Obsidian platforms          | Superseded | Personal macOS-only v1 under D042                                       |
+| D005 | Attachment discovery semantics        | Accepted   | Direct local embeds only                                                |
+| D006 | Generated output location             | Accepted   | Active-note tags plus managed per-attachment section                    |
+| D007 | Metadata schema                       | Superseded | Fixed core only in minimal v1 under D042                                |
+| D008 | Review and write behavior             | Accepted   | Automatically write validated results after explicit command invocation |
+| D009 | Reprocessing and cache policy         | Accepted   | Always reprocess embedded attachments when invoked                      |
+| D010 | Credential storage                    | Accepted   | Obsidian SecretStorage; minimum app version 1.11.4                      |
+| D011 | Error, progress, and cancellation UX  | Accepted   | Cancellable per-attachment progress modal                               |
+| D012 | Plugin name and identifier            | Accepted   | Objest (`objest`)                                                       |
+| D013 | Model selection strategy              | Superseded | Fixed `gpt-5.6-luna` in minimal v1 under D042                           |
+| D014 | Default model profile                 | Accepted   | Balanced compact model; pin exact ID during implementation              |
+| D015 | OCR language policy                   | Superseded | English only in minimal v1 under D042                                   |
+| D016 | PDF embed page scope                  | Accepted   | Analyze the entire resolved PDF                                         |
+| D017 | Large-document strategy               | Superseded | Reject above simple v1 limits under D042                                |
+| D018 | Attachment concurrency                | Accepted   | Process one attachment at a time                                        |
+| D019 | Managed-section placement             | Accepted   | Top of note immediately after properties                                |
+| D020 | Generated tag storage                 | Accepted   | Additive merge into standard `tags` property                            |
+| D021 | Core metadata properties              | Accepted   | Tags only in frontmatter; all other metadata in managed section         |
+| D022 | Supported attachment formats          | Accepted   | PDF only                                                                |
+| D023 | Plugin scaffold and build tooling     | Accepted   | Official sample conventions with npm, TypeScript, and esbuild           |
+| D024 | Source citation policy                | Accepted   | Do not render page citations in generated output                        |
+| D025 | Summary presentation                  | Accepted   | Concise paragraphs followed by readable metadata                        |
+| D026 | Distribution target                   | Superseded | Small personal project under D042                                       |
+| D027 | Project license                       | Accepted   | MIT License                                                             |
+| D028 | Cost and size guardrails              | Superseded | Fixed rejection limits; no cost estimator under D042                    |
+| D029 | Network privacy consent               | Accepted   | One-time disclosure before the first OpenAI request                     |
+| D030 | Local content retention               | Accepted   | No persistent document-content cache                                    |
+| D031 | OCR asset distribution                | Accepted   | Bundle executable assets and English; download additional languages     |
+| D032 | Stale managed entries                 | Superseded | Leave old entries unchanged in minimal v1 under D042                    |
+| D033 | Write consistency and edit conflicts  | Accepted   | Conflict-checked body update first, then additive frontmatter tags      |
+| D034 | OpenAI request privacy controls       | Accepted   | No filename/path; disable provider-side response storage                |
+| D035 | Cancellation/write boundary           | Accepted   | Abort processing promptly; finish an already-started write commit       |
+| D036 | Hard resource limits                  | Accepted   | Non-bypassable safety ceilings; users may only lower thresholds         |
+| D037 | Generated-tag provenance              | Superseded | Additive tags without ownership tracking under D042                     |
+| D038 | OpenAI API and transport              | Accepted   | Official OpenAI SDK with Responses API and structured outputs           |
+| D039 | Concrete default OpenAI model         | Accepted   | `gpt-5.6-luna`                                                          |
+| D040 | Analysis output language              | Superseded | English only in minimal v1 under D042                                   |
+| D041 | Prompt customization                  | Accepted   | One fixed, versioned prompt contract; no custom instructions in v1      |
+| D042 | Minimal personal v1 scope             | Accepted   | macOS-only, fixed English, fixed model, bounded single-request pipeline |
+| D043 | Fixed schema field limits             | Accepted   | Conservative bounded core fields and deterministic tag normalization    |
+| D044 | Marker parsing and operation timeouts | Accepted   | Exact fail-closed markers; 15-minute local and 2-minute provider limits |
 
 ---
 
@@ -829,7 +831,7 @@ Retain the generated entry and visibly mark it as stale when its stored attachme
 
 D033–D037 were identified during independent documentation review and the extraction spike. They will be discussed one at a time before their corresponding implementation begins:
 
-- No unresolved product-level decisions currently block the next implementation phase. Exact schema limits, managed-marker syntax, and D036 ceiling values must still be recorded before their respective persistence/release gates.
+- No unresolved product-level decisions currently block the next implementation phase.
 
 ---
 
@@ -1093,3 +1095,71 @@ For minimal v1, D042 supersedes the broader parts of D004, D007, D013, D015, D01
 - A missing edge case may produce a bounded, actionable failure; it may never justify destructive note writes, secret leakage, unbounded resource use, or sending undisclosed data.
 - Documentation, implementation plan, settings, tests, and completion reports must distinguish minimal-v1 requirements from backlog ideas.
 - Do not promote backlog work opportunistically while implementing v1.
+
+---
+
+## D043: Fixed schema field limits
+
+**Status:** Accepted
+
+### Context
+
+D006/D010 require bounded runtime validation, and D042 intentionally favors simple fixed behavior over configuration. The v1 spec already fixes summary, tag-count, and entity-count ceilings but did not bound every model-authored string or define deterministic tag normalization.
+
+### Decision
+
+Use these fixed model-authored field bounds in minimal v1:
+
+| Field               |                                               Bound |
+| ------------------- | --------------------------------------------------: |
+| Summary             |                                  1–2,000 characters |
+| Tags                |    0–7 unique normalized values, 64 characters each |
+| Document type       |                           `null` or 1–80 characters |
+| Document date       | `null` or a real calendar date in `YYYY-MM-DD` form |
+| Entities            |     0–15 unique trimmed values, 120 characters each |
+| Source language     |                           `null` or 1–64 characters |
+| Warnings            |                    0–10 values, 240 characters each |
+| Returned model ID   |                                    1–128 characters |
+| Processed timestamp |           UTC ISO 8601 timestamp supplied by Objest |
+
+Normalize each generated tag by applying Unicode NFKC normalization, trimming whitespace, removing leading `#` characters, lowercasing, converting whitespace and underscores to `-`, retaining only Unicode letters/numbers plus `-` and `/`, collapsing repeated separators, trimming separators from segment boundaries, and rejecting a result that is empty, numeric-only, or longer than 64 characters. Deduplicate normalized tags while preserving first-seen order.
+
+The provider model controls only summary, tags, document type/date, entities, source language, and warnings. Objest supplies schema version, prompt version, actual response model ID, and processing timestamp, then validates the complete object.
+
+### Consequences
+
+- Fewer than three tags, including zero, remain valid when the document does not justify them.
+- Values outside these bounds fail validation; minimal v1 does not truncate factual model output silently.
+- Deterministic normalization may reject unusual but technically valid Obsidian tag forms. Broader configurable normalization belongs in the backlog.
+- Duplicate entities are removed by exact comparison after trimming; more advanced entity canonicalization remains backlog work.
+
+---
+
+## D044: Marker parsing and operation timeouts
+
+**Status:** Accepted
+
+### Context
+
+Persistence must fail closed around owned markers, and PDF/OCR/provider operations must not wait indefinitely. D042 favors a small fixed implementation rather than configurable recovery machinery.
+
+### Decision
+
+Recognize only these exact line-oriented markers:
+
+- `<!-- objest:managed:start -->`
+- `<!-- objest:managed:end -->`
+- `<!-- objest:entry:start id="<base64url-encoded UTF-8 vault path>" -->`
+- `<!-- objest:entry:end -->`
+
+A note is writable only when it contains either no Objest managed markers or exactly one correctly ordered managed pair. Inside an existing managed section, every entry start must have one following entry end, entries may not nest, IDs must be non-empty base64url values, and IDs must be unique. Any orphan, duplicate, nested, out-of-order, or lookalike Objest marker fails before a body/tag write. Text outside exact Objest markers remains user-owned.
+
+Use a 15-minute local-processing deadline per PDF covering PDF loading, text extraction, rendering, and OCR, and a separate 2-minute deadline per OpenAI request. User cancellation and deadlines share abort propagation. Persistence begins only after analysis validates; once it begins, do not apply the processing abort signal to the short Vault body/tag commit.
+
+### Consequences
+
+- A malformed old managed section requires manual repair before Objest writes again.
+- Minimal v1 does not attempt marker recovery or accept marker variants.
+- Local processing may fail at the 15-minute deadline even if slow OCR would eventually succeed; supporting longer/configurable runs belongs in the backlog.
+- OpenAI retry behavior remains bounded by D042/D043; retries do not reset the 2-minute request deadline.
+- Vault writes are not abandoned behind a synthetic timeout because the underlying write could still complete after the caller loses certainty.

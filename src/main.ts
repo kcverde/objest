@@ -1,6 +1,10 @@
 import { Plugin } from 'obsidian';
 import { registerCommands } from './commands/register';
-import { DEFAULT_SETTINGS, type ObjestSettings } from './settings/model';
+import {
+	DEFAULT_SETTINGS,
+	parseSettings,
+	type ObjestSettings,
+} from './settings/model';
 import { ObjestSettingTab } from './settings/tab';
 
 export default class ObjestPlugin extends Plugin {
@@ -17,13 +21,6 @@ export default class ObjestPlugin extends Plugin {
 	}
 
 	private async loadSettings(): Promise<void> {
-		const saved = (await this.loadData()) as Partial<ObjestSettings> | null;
-		this.settings = {
-			...DEFAULT_SETTINGS,
-			...saved,
-			ocrLanguages: saved?.ocrLanguages?.length
-				? saved.ocrLanguages
-				: ['eng'],
-		};
+		this.settings = parseSettings(await this.loadData());
 	}
 }

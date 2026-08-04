@@ -1,13 +1,14 @@
 import {
 	GlobalWorkerOptions,
 	getDocument,
+	type PDFDocumentProxy,
 	type PDFPageProxy,
 } from 'pdfjs-dist';
 import pdfWorkerSource from 'pdfjs-dist/build/pdf.worker.min.mjs';
+import { V1_LIMITS } from '../domain/v1-constants';
 import { hasUsableEmbeddedText, normalizeExtractedText } from './text';
 
 const DEFAULT_RENDER_SCALE = 2;
-const MAX_RENDER_PIXELS = 16_000_000;
 
 export interface ExtractedPage {
 	method: 'embedded' | 'ocr';
@@ -55,7 +56,19 @@ export class PdfExtractor {
 			data: new Uint8Array(data),
 			useWorkerFetch: false,
 		});
-		const document = await loadingTask.promise;
+		const onAbort = () => void loadingTask.destroy();
+		signal.addEventListener('abort', onAbort, { once: true });
+		let document: PDFDocumentProxy;
+		try {
+			document = await loadingTask.promise;
+		} finally {
+			signal.removeEventListener('abort', onAbort);
+		}
+		throwIfAborted(signal);
+		if (document.numPages > V1_LIMITS.pagesPerPdf) {
+			await loadingTask.destroy();
+			throw new RangeError('The PDF exceeds the 50-page limit.');
+		}
 
 		try {
 			const pages: ExtractedPage[] = [];
@@ -169,7 +182,8 @@ async function renderPage(
 ): Promise<HTMLCanvasElement> {
 	const baseViewport = page.getViewport({ scale: 1 });
 	const scaleByPixels = Math.sqrt(
-		MAX_RENDER_PIXELS / (baseViewport.width * baseViewport.height),
+		V1_LIMITS.renderedPixelsPerPage /
+			(baseViewport.width * baseViewport.height),
 	);
 	const scale = Math.min(DEFAULT_RENDER_SCALE, scaleByPixels);
 	const viewport = page.getViewport({ scale });

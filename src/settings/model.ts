@@ -1,26 +1,43 @@
 export interface ObjestSettings {
-	largeRunPageThreshold: number;
-	modelIdOverride: string;
-	ocrLanguages: string[];
 	openAiSecretId: string;
 	privacyConsentVersion: number | null;
 }
 
 export const DEFAULT_SETTINGS: ObjestSettings = {
-	largeRunPageThreshold: 50,
-	modelIdOverride: '',
-	ocrLanguages: ['eng'],
 	openAiSecretId: '',
 	privacyConsentVersion: null,
 };
 
-const TESSERACT_LANGUAGE_CODE = /^[a-z0-9_]{3,12}$/;
+const SECRET_ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
-export function normalizeOcrLanguages(value: string): string[] {
-	const normalized = value
-		.split(',')
-		.map((language) => language.trim().toLowerCase())
-		.filter((language) => TESSERACT_LANGUAGE_CODE.test(language));
+export function parseSettings(value: unknown): ObjestSettings {
+	if (!isRecord(value)) return { ...DEFAULT_SETTINGS };
 
-	return [...new Set(normalized.length > 0 ? normalized : ['eng'])];
+	return {
+		openAiSecretId: parseSecretId(value.openAiSecretId),
+		privacyConsentVersion: parseConsentVersion(value.privacyConsentVersion),
+	};
+}
+
+function parseSecretId(value: unknown): string {
+	if (
+		typeof value !== 'string' ||
+		value.length > 128 ||
+		(value.length > 0 && !SECRET_ID.test(value))
+	) {
+		return '';
+	}
+	return value;
+}
+
+function parseConsentVersion(value: unknown): number | null {
+	return typeof value === 'number' &&
+		Number.isSafeInteger(value) &&
+		value >= 1
+		? value
+		: null;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
