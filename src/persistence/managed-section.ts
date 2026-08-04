@@ -1,4 +1,7 @@
-import type { V1AttachmentAnalysis } from '../analysis/attachment-analysis';
+import {
+	V1AttachmentAnalysisSchema,
+	type V1AttachmentAnalysis,
+} from '../analysis/attachment-analysis';
 
 const CALLOUT_START = /^> \[!objest\] (.+)$/u;
 const SOURCE_LINE = /^> \*\*Source:\*\* \[\[(.+)\]\]$/u;
@@ -77,13 +80,16 @@ export function updateManagedEntry(
 	return insertAtBodyStart(note, parsed.insertion, entry);
 }
 
-export function renderEntry({
-	analysis,
-	attachmentPath,
-}: RenderedAttachment): string {
+export function renderEntry(attachment: RenderedAttachment): string {
+	const validated = V1AttachmentAnalysisSchema.safeParse(attachment.analysis);
+	if (!validated.success)
+		throw new ManagedSectionError('The attachment analysis is invalid.');
+
+	const analysis = validated.data;
+	const sourceLine = renderSourceLine(attachment.attachmentPath);
 	const lines = [
 		`> [!objest] ${escapeMarkdown(analysis.title)}`,
-		renderSourceLine(attachmentPath),
+		sourceLine,
 		'>',
 		...quoteLines(escapeParagraphs(analysis.summary)),
 		'>',
@@ -113,7 +119,20 @@ export function renderEntry({
 		`> - **Processed:** ${escapeMarkdown(analysis.processedAt)}`,
 		`> - **Model:** \`${escapeCode(analysis.model)}\``,
 	);
-	return lines.join('\n');
+
+	const entry = lines.join('\n');
+	const parsed = parseCalloutRegion(entry);
+	const parsedEntry = parsed.entries[0];
+	if (
+		parsed.entries.length !== 1 ||
+		parsedEntry?.start !== 0 ||
+		parsedEntry?.end !== entry.length ||
+		parsedEntry?.sourceLine !== sourceLine
+	)
+		throw new ManagedSectionError(
+			'The rendered Objest callout does not match the owned-entry format.',
+		);
+	return entry;
 }
 
 export function encodePathId(path: string): string {

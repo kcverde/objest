@@ -15,6 +15,11 @@ const boundedTrimmedString = (maximum: number) =>
 			message: 'Value must not have surrounding whitespace.',
 		});
 
+const boundedTrimmedSingleLineString = (maximum: number) =>
+	boundedTrimmedString(maximum).refine((value) => !/[\r\n]/u.test(value), {
+		message: 'Value must be a single line.',
+	});
+
 const normalizedTagSchema = z
 	.string()
 	.min(1)
@@ -44,22 +49,16 @@ export const ModelGeneratedAnalysisSchema = z.strictObject({
 	tags: z
 		.array(z.string().min(1).max(V1_LIMITS.tagCharacters))
 		.max(V1_LIMITS.tags),
-	documentType: z
-		.string()
-		.min(1)
-		.max(V1_LIMITS.documentTypeCharacters)
-		.nullable(),
+	documentType: singleLineString(V1_LIMITS.documentTypeCharacters).nullable(),
 	documentDate: z.string().max(10).nullable(),
 	entities: z
-		.array(z.string().min(1).max(V1_LIMITS.entityCharacters))
+		.array(singleLineString(V1_LIMITS.entityCharacters))
 		.max(V1_LIMITS.entities),
-	sourceLanguage: z
-		.string()
-		.min(1)
-		.max(V1_LIMITS.sourceLanguageCharacters)
-		.nullable(),
+	sourceLanguage: singleLineString(
+		V1_LIMITS.sourceLanguageCharacters,
+	).nullable(),
 	warnings: z
-		.array(z.string().min(1).max(V1_LIMITS.warningCharacters))
+		.array(singleLineString(V1_LIMITS.warningCharacters))
 		.max(V1_LIMITS.warnings),
 });
 
@@ -70,34 +69,33 @@ export type ModelGeneratedAnalysis = z.infer<
 export const V1AttachmentAnalysisSchema = z.strictObject({
 	schemaVersion: z.literal(V1_SCHEMA_VERSION),
 	promptVersion: z.literal(V1_PROMPT_VERSION),
-	title: boundedTrimmedString(V1_LIMITS.titleCharacters).refine(
-		(value) => !/[\r\n]/u.test(value),
-		{ message: 'Title must be a single line.' },
+	title: boundedTrimmedSingleLineString(V1_LIMITS.titleCharacters),
+	summary: boundedTrimmedString(V1_LIMITS.summaryCharacters).transform(
+		(value) => value.replace(/\r\n?/gu, '\n'),
 	),
-	summary: boundedTrimmedString(V1_LIMITS.summaryCharacters),
 	tags: z
 		.array(normalizedTagSchema)
 		.max(V1_LIMITS.tags)
 		.refine((values) => new Set(values).size === values.length, {
 			message: 'Tags must be unique.',
 		}),
-	documentType: boundedTrimmedString(
+	documentType: boundedTrimmedSingleLineString(
 		V1_LIMITS.documentTypeCharacters,
 	).nullable(),
 	documentDate: documentDateSchema.nullable(),
 	entities: z
-		.array(boundedTrimmedString(V1_LIMITS.entityCharacters))
+		.array(boundedTrimmedSingleLineString(V1_LIMITS.entityCharacters))
 		.max(V1_LIMITS.entities)
 		.refine((values) => new Set(values).size === values.length, {
 			message: 'Entities must be unique.',
 		}),
-	sourceLanguage: boundedTrimmedString(
+	sourceLanguage: boundedTrimmedSingleLineString(
 		V1_LIMITS.sourceLanguageCharacters,
 	).nullable(),
 	warnings: z
-		.array(boundedTrimmedString(V1_LIMITS.warningCharacters))
+		.array(boundedTrimmedSingleLineString(V1_LIMITS.warningCharacters))
 		.max(V1_LIMITS.warnings),
-	model: boundedTrimmedString(V1_LIMITS.modelCharacters),
+	model: boundedTrimmedSingleLineString(V1_LIMITS.modelCharacters),
 	processedAt: z.iso.datetime({ offset: false }),
 });
 

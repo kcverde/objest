@@ -1128,6 +1128,8 @@ Normalize each generated tag by applying Unicode NFKC normalization, trimming wh
 
 The provider model controls only summary, tags, document type/date, entities, source language, and warnings. Objest supplies schema version, prompt version, actual response model ID, and processing timestamp, then validates the complete object.
 
+Document type, every entity, source language, every warning, and the returned model ID are line-oriented fields. Reject CR or LF in those fields at both the model-output and final runtime-schema boundaries rather than truncating or rewriting factual metadata. Summaries may contain paragraphs; normalize CRLF and lone CR line endings to LF before rendering.
+
 ### Consequences
 
 - Fewer than three tags, including zero, remain valid when the document does not justify them.
@@ -1201,6 +1203,7 @@ On the next successful write, convert an exact D044 legacy section and all of it
 
 - Relevant titles come from PDF/OCR content sent under the existing consent boundary, not from filenames or paths.
 - Rendering remains deterministic; title, summary, metadata, and attachment path are untrusted and escaped in code.
+- Runtime-validate the complete analysis before rendering. Reparse every newly rendered entry and require one recognized callout whose boundary consumes the complete rendered string.
 - A source line is local note output and is never added to the OpenAI request.
 - Objest replaces only a callout with the matching exact source line, preserves unmatched callouts, and preserves all non-callout content.
 - Duplicate sources, malformed callouts, and Objest callouts outside the contiguous top-of-body region fail before body or tag writes.

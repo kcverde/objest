@@ -73,6 +73,40 @@ describe('managed callout persistence', () => {
 		expect(result).not.toContain('<!--');
 	});
 
+	it.each([
+		['LF', 'First paragraph.\n\nSecond paragraph.'],
+		['CRLF', 'First paragraph.\r\n\r\nSecond paragraph.'],
+		['lone CR', 'First paragraph.\r\rSecond paragraph.'],
+	])('keeps every %s summary line inside the callout', (_name, summary) => {
+		const result = update('', 'x.pdf', { ...analysis, summary });
+		expect(result).toContain(
+			'> First paragraph\\.\n>\n> Second paragraph\\.',
+		);
+		expect(
+			result
+				.trimEnd()
+				.split('\n')
+				.every((line) => line.startsWith('>')),
+		).toBe(true);
+	});
+
+	it('rejects hostile multiline metadata before replacing an existing entry', () => {
+		const existing = update('User body.\n', 'x.pdf');
+		expect(() =>
+			update(existing, 'x.pdf', {
+				...analysis,
+				documentType: 'Report\nEscaped user-owned text',
+			}),
+		).toThrow(ManagedSectionError);
+
+		const retried = update(existing, 'x.pdf', {
+			...analysis,
+			summary: 'Safe replacement.',
+		});
+		expect(retried).not.toContain('Escaped user-owned text');
+		expect(retried).toContain('User body.\n');
+	});
+
 	it('migrates exact legacy markers to comment-free callouts on the next write', () => {
 		const aId = encodePathId('a.pdf');
 		const bId = encodePathId('b.pdf');

@@ -127,16 +127,17 @@ interface V1AttachmentAnalysis {
 Rules:
 
 - Title: a concise, specific English plain-text title grounded only in document content, 1–120 characters on one line. It must not be inferred from or rely on the attachment filename.
-- Summary: one to three concise English paragraphs, 1–2,000 characters.
+- Summary: one to three concise English paragraphs, 1–2,000 characters. Normalize CRLF and lone CR line endings to LF before rendering.
 - Tags: zero to seven normalized Obsidian tags, at most 64 characters each. Three to seven are preferred when supported by the document; fewer are allowed when appropriate. Use the deterministic normalization rules in D043.
-- Document type: `null` or 1–80 characters.
+- Document type: `null` or a single-line value of 1–80 characters.
 - Document date: a real calendar date in ISO `YYYY-MM-DD` form only when the document supports a specific date; otherwise `null`.
-- Entities: at most 15 unique trimmed people, organizations, places, or identifiers useful for understanding the document, at most 120 characters each.
-- Source language: `null` or 1–64 characters.
-- Warnings: at most 10 values of at most 240 characters each.
-- Model ID: 1–128 characters and taken from the provider response, not model-authored JSON.
+- Entities: at most 15 unique trimmed, single-line people, organizations, places, or identifiers useful for understanding the document, at most 120 characters each.
+- Source language: `null` or a single-line value of 1–64 characters.
+- Warnings: at most 10 single-line values of at most 240 characters each.
+- Model ID: a single-line value of 1–128 characters taken from the provider response, not model-authored JSON.
 - Processed timestamp: a UTC ISO 8601 value supplied by Objest.
 - Unknown values are `null` or omitted from rendered output; never invent them.
+- Reject CR or LF in line-oriented model and provenance fields at both model-output and final runtime validation; do not truncate or rewrite factual metadata to make it valid.
 - No document-specific arbitrary extra fields in minimal v1.
 - PDF/OCR text is untrusted data and cannot alter instructions or output structure.
 
@@ -166,6 +167,7 @@ Persistence rules:
 - Replace only the callout with the matching exact source line, preserve unmatched Objest callouts, and preserve all non-Objest content outside the callouts.
 - Fail without writing when Objest callouts are malformed, duplicated by source, or appear outside the contiguous top-of-body region.
 - On the next successful attachment write, migrate an exact legacy D044 HTML-comment section to callouts and remove all legacy Objest comments. Fail closed rather than guessing if the legacy section is malformed or contains unrecognized content.
+- Runtime-validate the complete analysis before rendering. Reparse each newly rendered entry and require its owned callout boundary to consume the complete rendered string before persistence.
 - Write the owned body entry first through a conflict-aware Vault transformation.
 - Then add generated tags to existing frontmatter `tags` through `processFrontMatter`.
 - Never remove existing tags.

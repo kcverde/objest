@@ -62,6 +62,23 @@ describe('ModelGeneratedAnalysisSchema', () => {
 			ModelGeneratedAnalysisSchema.parse(generated(overrides)),
 		).toThrow();
 	});
+
+	it.each(['\n', '\r'])(
+		'rejects %s in every line-oriented model field',
+		(separator) => {
+			const invalidValues: Partial<ModelGeneratedAnalysis>[] = [
+				{ documentType: `Report${separator}Injected` },
+				{ entities: [`Objest${separator}Injected`] },
+				{ sourceLanguage: `English${separator}Injected` },
+				{ warnings: [`Warning${separator}Injected`] },
+			];
+			for (const overrides of invalidValues) {
+				expect(() =>
+					ModelGeneratedAnalysisSchema.parse(generated(overrides)),
+				).toThrow();
+			}
+		},
+	);
 });
 
 describe('createAttachmentAnalysis', () => {
@@ -108,6 +125,20 @@ describe('createAttachmentAnalysis', () => {
 			).toThrow();
 		},
 	);
+
+	it.each([
+		['LF', 'First paragraph.\n\nSecond paragraph.'],
+		['CRLF', 'First paragraph.\r\n\r\nSecond paragraph.'],
+		['lone CR', 'First paragraph.\r\rSecond paragraph.'],
+	])('normalizes %s summary line endings', (_name, summary) => {
+		expect(
+			createAttachmentAnalysis(
+				generated({ summary }),
+				'gpt-returned-snapshot',
+				now,
+			).summary,
+		).toBe('First paragraph.\n\nSecond paragraph.');
+	});
 
 	it.each(['2025-02-29', '2026-13-01', '2026-04-31', '03/01/2026'])(
 		'rejects invalid document date %s',
@@ -174,6 +205,27 @@ describe('V1AttachmentAnalysisSchema', () => {
 			expect(() =>
 				V1AttachmentAnalysisSchema.parse({ ...valid, processedAt }),
 			).toThrow();
+		},
+	);
+
+	it.each(['\n', '\r'])(
+		'rejects %s in every final line-oriented field',
+		(separator) => {
+			const invalidValues: Record<string, unknown>[] = [
+				{ documentType: `Report${separator}Injected` },
+				{ entities: [`Objest${separator}Injected`] },
+				{ sourceLanguage: `English${separator}Injected` },
+				{ warnings: [`Warning${separator}Injected`] },
+				{ model: `gpt-5.6-luna${separator}Injected` },
+			];
+			for (const overrides of invalidValues) {
+				expect(() =>
+					V1AttachmentAnalysisSchema.parse({
+						...valid,
+						...overrides,
+					}),
+				).toThrow();
+			}
 		},
 	);
 
