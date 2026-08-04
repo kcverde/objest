@@ -13,9 +13,9 @@ Objest's minimal end-to-end v1 is implemented and covered by offline tests. Loca
 3. Extract text locally with PDF.js and OCR scanned pages locally with Tesseract.js.
 4. Show a simple cancellable progress modal and reject PDFs above fixed v1 limits.
 5. Send only bounded normalized document text—not the source PDF, filename, path, or unrelated vault content—to OpenAI using the user's own API key.
-6. Validate the response, merge generated tags into the note's existing `tags`, and automatically update a marked `## Objest` section at the top of the note body.
+6. Validate the response, merge generated tags into the note's existing `tags`, and automatically update a top-of-note Objest callout titled for each document.
 
-Every invocation reprocesses the embedded PDFs and may incur OpenAI charges. Existing user tags and content outside Objest's managed markers are preserved.
+Every invocation reprocesses the embedded PDFs and may incur OpenAI charges. Existing user tags and content outside Objest-owned callouts are preserved. New output uses native callouts rather than HTML marker comments; exact legacy marker sections are migrated on the next successful write.
 
 ## Setup and first test
 
@@ -24,7 +24,7 @@ Every invocation reprocesses the embedded PDFs and may incur OpenAI charges. Exi
 3. Use a disposable note with a synthetic or non-sensitive directly embedded PDF.
 4. Run **Objest: Analyze embedded PDFs**.
 5. Review the OpenAI disclosure. Cancelling performs no extraction, request, or write; accepting stores only the consent version.
-6. For the first live run, use a small text PDF and verify the `## Objest` section and additive frontmatter tags. Then rerun and confirm the existing attachment entry is replaced rather than duplicated.
+6. For the first live run, use a small text PDF and verify its document-titled Objest callout and additive frontmatter tags. Then rerun and confirm the existing attachment entry is replaced rather than duplicated.
 
 The fixed model is `gpt-5.6-luna`. Its availability, cost, and output quality depend on the user's OpenAI account and current OpenAI service. Do not use private documents for the first live verification.
 

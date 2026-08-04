@@ -106,7 +106,7 @@ These defaults apply unless the scaffold establishes stricter rules:
 - Model expected failures with typed errors or result objects where callers need recovery behavior.
 - Keep prompts versioned and test their input/output contracts.
 - Keep provider SDK types inside adapter modules.
-- Use deterministic normalization for tags, property names, paths, and generated block markers.
+- Use deterministic normalization for tags, property names, paths, and generated ownership syntax.
 - Comments should explain constraints or reasoning, not restate code.
 - User-facing errors should say which attachment failed and what the user can do next.
 
@@ -134,7 +134,7 @@ These defaults apply unless the scaffold establishes stricter rules:
 
 - Unit-test attachment resolution, normalization, schema validation, idempotent writes, and error mapping.
 - Use fixtures for text PDFs, scanned PDFs, malformed PDFs, empty PDFs, large inputs, duplicate links, and malformed model responses.
-- Minimal-v1 priorities are direct embed resolution, fixed limits, text/scan extraction, schema validation, prompt injection resistance, hostile Markdown/marker handling, idempotent writes, and partial failure. Record broader fuzz/adversarial matrices in Backlog unless a touched boundary requires a regression test now.
+- Minimal-v1 priorities are direct embed resolution, fixed limits, text/scan extraction, schema validation, prompt injection resistance, hostile Markdown/owned-callout handling, idempotent writes, and partial failure. Record broader fuzz/adversarial matrices in Backlog unless a touched boundary requires a regression test now.
 - Fixtures must be synthetic, public-domain, or explicitly redistributable and contain no personal data.
 - Mock provider boundaries in deterministic tests.
 - Add regression tests for every fixed parsing, path-resolution, or destructive-write bug.

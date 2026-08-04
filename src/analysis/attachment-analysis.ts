@@ -29,7 +29,17 @@ const documentDateSchema = z
 	.string()
 	.refine(isRealCalendarDate, { message: 'Invalid calendar date.' });
 
+const singleLineString = (maximum: number) =>
+	z
+		.string()
+		.min(1)
+		.max(maximum)
+		.refine((value) => !/[\r\n]/u.test(value), {
+			message: 'Value must be a single line.',
+		});
+
 export const ModelGeneratedAnalysisSchema = z.strictObject({
+	title: singleLineString(V1_LIMITS.titleCharacters),
 	summary: z.string().min(1).max(V1_LIMITS.summaryCharacters),
 	tags: z
 		.array(z.string().min(1).max(V1_LIMITS.tagCharacters))
@@ -60,6 +70,10 @@ export type ModelGeneratedAnalysis = z.infer<
 export const V1AttachmentAnalysisSchema = z.strictObject({
 	schemaVersion: z.literal(V1_SCHEMA_VERSION),
 	promptVersion: z.literal(V1_PROMPT_VERSION),
+	title: boundedTrimmedString(V1_LIMITS.titleCharacters).refine(
+		(value) => !/[\r\n]/u.test(value),
+		{ message: 'Title must be a single line.' },
+	),
 	summary: boundedTrimmedString(V1_LIMITS.summaryCharacters),
 	tags: z
 		.array(normalizedTagSchema)
@@ -100,6 +114,7 @@ export function createAttachmentAnalysis(
 	return V1AttachmentAnalysisSchema.parse({
 		schemaVersion: V1_SCHEMA_VERSION,
 		promptVersion: V1_PROMPT_VERSION,
+		title: generated.title.trim(),
 		summary: generated.summary.trim(),
 		tags: normalizeTags(generated.tags),
 		documentType: generated.documentType?.trim() ?? null,

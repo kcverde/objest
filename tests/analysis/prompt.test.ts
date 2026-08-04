@@ -18,6 +18,10 @@ describe('buildAnalysisPrompt', () => {
 			content: V1_ANALYSIS_INSTRUCTIONS,
 		});
 		expect(messages[0]?.content).toContain('untrusted document data');
+		expect(messages[0]?.content).toContain(
+			'concise, specific English title',
+		);
+		expect(messages[0]?.content).toContain('must not rely on a filename');
 		expect(messages[0]?.content).not.toContain(injection);
 		expect(JSON.parse(messages[1]?.content ?? '')).toEqual({
 			pages: [

@@ -4,8 +4,9 @@ import type { V1AttachmentAnalysis } from '../../src/analysis/attachment-analysi
 import { ObsidianNoteWriter } from '../../src/persistence/obsidian-note-writer';
 
 const analysis: V1AttachmentAnalysis = {
-	schemaVersion: 1,
-	promptVersion: 1,
+	schemaVersion: 2,
+	promptVersion: 2,
+	title: 'Synthetic document',
 	summary: 'Summary',
 	tags: ['new-tag'],
 	documentType: null,
@@ -67,7 +68,7 @@ describe('ObsidianNoteWriter', () => {
 		await expect(
 			state.writer.write({ analysis, attachmentPath: 'scan.pdf' }),
 		).resolves.toEqual({ bodyWritten: true, tagsWritten: true });
-		expect(state.noteText()).toContain('## Objest');
+		expect(state.noteText()).toContain('> [!objest] Synthetic document');
 		expect(state.frontmatter).toEqual({
 			title: 'Keep',
 			tags: ['existing', 'new-tag'],
@@ -95,6 +96,6 @@ describe('ObsidianNoteWriter', () => {
 			tagsWritten: false,
 			tagError: 'The note frontmatter tags could not be updated.',
 		});
-		expect(state.noteText()).toContain('## Objest');
+		expect(state.noteText()).toContain('> [!objest] Synthetic document');
 	});
 });

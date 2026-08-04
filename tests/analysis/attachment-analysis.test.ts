@@ -12,6 +12,7 @@ function generated(
 	overrides: Partial<ModelGeneratedAnalysis> = {},
 ): ModelGeneratedAnalysis {
 	return {
+		title: 'Synthetic research report',
 		summary: 'A grounded summary.',
 		tags: ['Research Notes', '#Archive'],
 		documentType: 'Report',
@@ -49,6 +50,7 @@ describe('ModelGeneratedAnalysisSchema', () => {
 	});
 
 	it.each([
+		['title', { title: 'x'.repeat(121) }],
 		['summary', { summary: 'x'.repeat(2_001) }],
 		['tag', { tags: ['x'.repeat(65)] }],
 		['document type', { documentType: 'x'.repeat(81) }],
@@ -66,6 +68,7 @@ describe('createAttachmentAnalysis', () => {
 	it('normalizes model fields and attaches trusted provenance', () => {
 		const analysis = createAttachmentAnalysis(
 			generated({
+				title: ' Synthetic research report ',
 				summary: '  A grounded summary.  ',
 				tags: ['#Research Notes', 'research-notes', '123'],
 				documentType: ' Report ',
@@ -78,8 +81,9 @@ describe('createAttachmentAnalysis', () => {
 		);
 
 		expect(analysis).toEqual({
-			schemaVersion: 1,
-			promptVersion: 1,
+			schemaVersion: 2,
+			promptVersion: 2,
+			title: 'Synthetic research report',
 			summary: 'A grounded summary.',
 			tags: ['research-notes'],
 			documentType: 'Report',
@@ -91,6 +95,19 @@ describe('createAttachmentAnalysis', () => {
 			processedAt: now,
 		});
 	});
+
+	it.each(['Bad\ntitle', 'Bad\rtitle'])(
+		'rejects multiline title %s',
+		(value) => {
+			expect(() =>
+				createAttachmentAnalysis(
+					generated({ title: value }),
+					'gpt-returned-snapshot',
+					now,
+				),
+			).toThrow();
+		},
+	);
 
 	it.each(['2025-02-29', '2026-13-01', '2026-04-31', '03/01/2026'])(
 		'rejects invalid document date %s',
@@ -108,6 +125,7 @@ describe('createAttachmentAnalysis', () => {
 	it('accepts nullable unknowns and maximum valid field sizes', () => {
 		const analysis = createAttachmentAnalysis(
 			generated({
+				title: 't'.repeat(120),
 				summary: 's'.repeat(2_000),
 				tags: Array.from({ length: 7 }, (_, index) => `tag-${index}`),
 				documentType: null,
@@ -143,10 +161,10 @@ describe('V1AttachmentAnalysisSchema', () => {
 			V1AttachmentAnalysisSchema.parse({ ...valid, extra: true }),
 		).toThrow();
 		expect(() =>
-			V1AttachmentAnalysisSchema.parse({ ...valid, schemaVersion: 2 }),
+			V1AttachmentAnalysisSchema.parse({ ...valid, schemaVersion: 1 }),
 		).toThrow();
 		expect(() =>
-			V1AttachmentAnalysisSchema.parse({ ...valid, promptVersion: 2 }),
+			V1AttachmentAnalysisSchema.parse({ ...valid, promptVersion: 1 }),
 		).toThrow();
 	});
 

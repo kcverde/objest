@@ -1,7 +1,7 @@
 export const V1_MODEL_ID = 'gpt-5.6-luna';
 export const V1_OCR_LANGUAGE = 'eng';
-export const V1_SCHEMA_VERSION = 1 as const;
-export const V1_PROMPT_VERSION = 1 as const;
+export const V1_SCHEMA_VERSION = 2 as const;
+export const V1_PROMPT_VERSION = 2 as const;
 
 export const V1_CONSENT_VERSION = 1 as const;
 
@@ -24,6 +24,7 @@ export const V1_LIMITS = {
 	summaryCharacters: 2_000,
 	tagCharacters: 64,
 	tags: 7,
+	titleCharacters: 120,
 	documentTypeCharacters: 80,
 	warnings: 10,
 	warningCharacters: 240,

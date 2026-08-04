@@ -27,7 +27,7 @@ This document holds useful work intentionally excluded from the minimal personal
 - Track attachment-to-tag provenance
 - Confirmed cleanup for unclaimed generated tags
 - Stronger optimistic concurrent-edit detection and recovery
-- Regression suite for malformed/duplicate/nested markers
+- Broader regression suite for malformed/duplicate/misplaced owned callouts and legacy markers
 
 ### OCR quality
 
@@ -137,7 +137,7 @@ This document holds useful work intentionally excluded from the minimal personal
 - Prompt injection inside PDF/OCR text
 - Oversized or deeply nested structured output
 - Unexpected Unicode and hostile Markdown values
-- Managed-marker injection attempts
+- Owned-callout and legacy-marker injection attempts
 - False facts and unsupported dates/entities
 - Model deprecation and alias drift
 - Provider request retention and policy changes
@@ -159,4 +159,4 @@ This document holds useful work intentionally excluded from the minimal personal
 - Uploading source PDFs to a cloud service
 - Hidden telemetry or analytics
 - Fetching/executing remote JavaScript or WASM
-- Silent writes outside frontmatter tags and Objest-managed markers
+- Silent writes outside frontmatter tags and Objest-owned callouts

@@ -56,7 +56,8 @@ This file records product and architecture decisions in the order they are discu
 | D041 | Prompt customization                  | Accepted   | One fixed, versioned prompt contract; no custom instructions in v1      |
 | D042 | Minimal personal v1 scope             | Accepted   | macOS-only, fixed English, fixed model, bounded single-request pipeline |
 | D043 | Fixed schema field limits             | Accepted   | Conservative bounded core fields and deterministic tag normalization    |
-| D044 | Marker parsing and operation timeouts | Accepted   | Exact fail-closed markers; 15-minute local and 2-minute provider limits |
+| D044 | Marker parsing and operation timeouts | Superseded | Legacy marker grammar replaced by D045; fixed timeouts retained         |
+| D045 | Document titles and owned output      | Accepted   | AI titles in native owned callouts; no new HTML marker comments         |
 
 ---
 
@@ -1163,3 +1164,44 @@ Use a 15-minute local-processing deadline per PDF covering PDF loading, text ext
 - Local processing may fail at the 15-minute deadline even if slow OCR would eventually succeed; supporting longer/configurable runs belongs in the backlog.
 - OpenAI retry behavior remains bounded by D042/D043; retries do not reset the 2-minute request deadline.
 - Vault writes are not abandoned behind a synthetic timeout because the underlying write could still complete after the caller loses certainty.
+
+### Supersession
+
+D045 supersedes the HTML-comment ownership grammar in this decision. D045 retains the 15-minute local-processing and 2-minute OpenAI deadlines and uses this exact legacy grammar only for fail-closed migration.
+
+---
+
+## D045: Document titles and comment-free owned output
+
+**Status:** Accepted
+
+### Context
+
+The first live output exposed implementation-oriented HTML marker comments and used a generic visible `## Objest` heading plus an attachment filename heading. The owner requested a title relevant to the ingested document and no HTML comments in generated output.
+
+### Decision
+
+Add a required model-generated `title` field: concise, specific English plain text grounded only in document content, one line, and at most 120 characters. Do not send or use the attachment filename as model context. Advance the analysis schema and prompt versions to 2.
+
+Render each attachment as a native Obsidian callout at the top of the note body:
+
+```markdown
+> [!objest] Document-relevant title
+> **Source:** [[attachment.pdf]]
+>
+> Summary and metadata…
+```
+
+New output contains no HTML ownership comments and no generic visible `## Objest` heading. Exact top-of-body `[!objest]` callouts are reserved as Objest-owned output. Their exact Source wikilink line is the attachment identity and their blockquote boundary is the entry boundary. Multiple entries remain contiguous.
+
+On the next successful write, convert an exact D044 legacy section and all of its entries to callouts, replacing the current attachment with its new validated analysis and preserving unmatched legacy entries inside migrated callouts. Derive a readable local fallback heading from the path only for an unmatched legacy entry until that attachment is reprocessed. Remove all legacy Objest comments during that migration. Reject malformed or unrecognized legacy output rather than guessing.
+
+### Consequences
+
+- Relevant titles come from PDF/OCR content sent under the existing consent boundary, not from filenames or paths.
+- Rendering remains deterministic; title, summary, metadata, and attachment path are untrusted and escaped in code.
+- A source line is local note output and is never added to the OpenAI request.
+- Objest replaces only a callout with the matching exact source line, preserves unmatched callouts, and preserves all non-callout content.
+- Duplicate sources, malformed callouts, and Objest callouts outside the contiguous top-of-body region fail before body or tag writes.
+- The `[!objest]` callout type is an explicit visible ownership signal. User-authored content must not use that reserved callout type unless it is intended to be managed by Objest.
+- D045 supersedes D019/D042/D044 where they require hidden HTML markers, a generic `## Objest` heading, or a fixed core schema without a document title; it extends D043 with the 120-character single-line title bound. Top-of-body placement, idempotence, fail-closed writes, independent attachment handling, and D044's operation deadlines remain accepted.

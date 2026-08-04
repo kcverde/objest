@@ -9,8 +9,9 @@ import {
 import type { AnalysisProvider } from '../../src/providers/analysis-provider';
 
 const analysis: V1AttachmentAnalysis = {
-	schemaVersion: 1,
-	promptVersion: 1,
+	schemaVersion: 2,
+	promptVersion: 2,
+	title: 'Synthetic document',
 	summary: 'Summary',
 	tags: ['tag'],
 	documentType: null,

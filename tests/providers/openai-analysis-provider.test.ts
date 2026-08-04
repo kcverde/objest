@@ -3,6 +3,7 @@ import { OpenAIAnalysisProvider } from '../../src/providers/openai/openai-analys
 import { AnalysisProviderError } from '../../src/providers/analysis-provider';
 
 const modelOutput = {
+	title: 'Synthetic research report',
 	summary: 'Synthetic grounded summary.',
 	tags: ['#Research Notes'],
 	documentType: 'Report',
@@ -114,11 +115,12 @@ describe('OpenAIAnalysisProvider', () => {
 		expect(requestBody.text).toMatchObject({
 			format: {
 				type: 'json_schema',
-				name: 'objest_v1_analysis',
+				name: 'objest_v1_analysis_v2',
 				strict: true,
 				schema: {
 					additionalProperties: false,
 					required: [
+						'title',
 						'summary',
 						'tags',
 						'documentType',
@@ -137,8 +139,9 @@ describe('OpenAIAnalysisProvider', () => {
 			]),
 		);
 		expect(result).toMatchObject({
-			schemaVersion: 1,
-			promptVersion: 1,
+			schemaVersion: 2,
+			promptVersion: 2,
+			title: 'Synthetic research report',
 			tags: ['research-notes'],
 			model: 'gpt-5.6-luna-2026-08-01',
 			processedAt: '2026-08-03T12:00:00.000Z',

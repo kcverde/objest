@@ -60,19 +60,20 @@ No chunking, custom prompts, extra metadata, model selection, or provider fallba
 
 ### Validation and rendering
 
-A versioned runtime schema validates summary, tags, document type/date, entities, source language, warnings, model, and timestamp. Model text never supplies Markdown or managed markers.
+A versioned runtime schema validates a document-grounded title, summary, tags, document type/date, entities, source language, warnings, model, and timestamp. Model text never supplies Markdown or ownership syntax.
 
-A deterministic renderer escapes untrusted values and creates the exact managed structure from `V1_SPEC.md`.
+A deterministic renderer escapes untrusted values and creates the exact native Obsidian callout structure from `V1_SPEC.md`.
 
 ### Persistence
 
 For a validated attachment:
 
 1. Use a conflict-aware Vault transformation against the latest note text.
-2. Validate the overall and per-entry markers.
-3. Insert or replace only the matching entry.
-4. Preserve content outside Objest markers.
-5. After the body succeeds, add normalized tags through `processFrontMatter`.
+2. Validate the contiguous top-of-body Objest callouts and exact source identity lines.
+3. Insert or replace only the matching callout.
+4. Preserve content outside Objest-owned callouts.
+5. Migrate exact legacy HTML-marker output to callouts; reject malformed legacy output.
+6. After the body succeeds, add normalized tags through `processFrontMatter`.
 
 There is no cross-operation transaction. A tag failure after a valid body write is reported and can be repaired by rerunning. Never restore an old whole-file snapshot over current user edits.
 
@@ -98,8 +99,9 @@ interface ExtractedPage {
 }
 
 interface V1AttachmentAnalysis {
-	schemaVersion: 1;
-	promptVersion: 1;
+	schemaVersion: 2;
+	promptVersion: 2;
+	title: string;
 	summary: string;
 	tags: string[];
 	documentType: string | null;
@@ -112,7 +114,7 @@ interface V1AttachmentAnalysis {
 }
 ```
 
-Exact runtime limits and marker format come from [V1_SPEC.md](V1_SPEC.md).
+Exact runtime limits and owned-callout format come from [V1_SPEC.md](V1_SPEC.md).
 
 ## Run lifecycle
 
@@ -143,7 +145,7 @@ Minimal does not mean unsafe:
 - PDF/OCR/model/path/Markdown data is untrusted and bounded.
 - No document-derived intermediates or raw provider payloads are persisted.
 - No remote JavaScript or WASM is downloaded or executed.
-- Marker corruption fails closed.
+- Owned-callout corruption and malformed legacy markers fail closed.
 - Existing tags are never removed.
 - Normal tests use fake providers and synthetic/redistributable fixtures.
 

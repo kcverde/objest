@@ -30,7 +30,7 @@ See [SPIKE_RESULTS.md](SPIKE_RESULTS.md).
 
 **Status:** Complete; offline contract tests pass and the connected flow has an owner-reported live pass. The separate opt-in live test script has not been run.
 
-- Add the exact `V1AttachmentAnalysis` Zod schema and TypeScript inference.
+- Add the exact `V1AttachmentAnalysis` Zod schema and TypeScript inference, including the document-grounded title.
 - Enforce field counts/lengths from V1 spec.
 - Add deterministic tag normalization and ISO-date validation.
 - Add a small provider interface and fake provider.
@@ -60,18 +60,18 @@ See [SPIKE_RESULTS.md](SPIKE_RESULTS.md).
 
 **Status:** Complete offline
 
-- Implement exact managed/entry markers from V1 spec.
-- Encode attachment path identity as base64url for marker IDs.
-- Render summary and fixed metadata in code with Markdown escaping.
-- Insert the managed section immediately after frontmatter.
-- Replace only a matching entry; leave unmatched old entries unchanged.
-- Fail closed on malformed, duplicate, or nested markers.
+- Render one exact native `[!objest]` callout per attachment, with no new HTML marker comments.
+- Use the exact rendered Source wikilink line as attachment identity.
+- Render the generated title, summary, and fixed metadata in code with Markdown escaping.
+- Insert contiguous owned callouts immediately after frontmatter.
+- Replace only a matching callout; leave unmatched old callouts unchanged.
+- Migrate exact legacy marker output on the next successful write and fail closed on malformed callouts or legacy markers.
 - Update managed body first through a conflict-aware Vault transform.
 - Add tags second through `processFrontMatter`, preserving all existing tags/properties.
 - Do not remove tags or track generated ownership in v1.
-- Add idempotence, hostile Markdown, marker injection, and partial-write tests.
+- Add idempotence, hostile Markdown, ownership-syntax injection, legacy migration, and partial-write tests.
 
-**Exit:** Repeated runs replace entries without changing user content outside owned markers or removing existing tags.
+**Exit:** Repeated runs replace entries without changing user content outside owned callouts or removing existing tags.
 
 ## Phase 5: Minimal command, consent, and modal
 

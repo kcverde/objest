@@ -55,7 +55,7 @@ export class OpenAIAnalysisProvider implements AnalysisProvider {
 					text: {
 						format: zodTextFormat(
 							ModelGeneratedAnalysisSchema,
-							'objest_v1_analysis',
+							'objest_v1_analysis_v2',
 						),
 					},
 				},

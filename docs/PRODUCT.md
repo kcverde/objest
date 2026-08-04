@@ -12,12 +12,13 @@ Imported and scanned documents require manual reading, summarization, tagging, a
 
 ## Minimal v1 user story
 
-Given an active Markdown note containing one or more directly embedded local PDFs, the user invokes **Objest: Analyze embedded PDFs**. On the current macOS Obsidian setup, Objest extracts or OCRs each bounded PDF, analyzes it with OpenAI, and automatically adds a short English summary, basic metadata, and additive tags without changing user-authored note content outside Objest's markers.
+Given an active Markdown note containing one or more directly embedded local PDFs, the user invokes **Objest: Analyze embedded PDFs**. On the current macOS Obsidian setup, Objest extracts or OCRs each bounded PDF, analyzes it with OpenAI, and automatically adds a document-relevant English title, a short English summary, basic metadata, and additive tags without changing user-authored note content outside Objest-owned callouts.
 
 ## Minimal output
 
 For each successfully processed PDF:
 
+- One concise, document-relevant English title derived from document content
 - One-to-three-paragraph English summary
 - Three-to-seven useful Obsidian tags when supported by the document
 - Document type
@@ -26,13 +27,13 @@ For each successfully processed PDF:
 - Source language when identifiable
 - Minimal provenance: processing time and model
 
-Objest writes per-PDF results to a marked `## Objest` section immediately after frontmatter and merges tags into the standard `tags` property without removing existing values.
+Objest writes each per-PDF result to a native `[!objest]` callout immediately after frontmatter, using the generated document title as the callout title, and merges tags into the standard `tags` property without removing existing values.
 
 ## Design principles
 
 1. **Useful before broad:** complete one personal macOS workflow before pursuing portability or distribution.
 2. **Small scope:** reject unsupported/oversized work rather than build complex recovery or chunking in v1.
-3. **User-content safety:** write only additive tags and content between valid Objest markers.
+3. **User-content safety:** write only additive tags and exact top-of-body Objest callouts.
 4. **Validated AI:** model output is untrusted and must pass a fixed runtime schema.
 5. **Privacy clarity:** local OCR and OpenAI analysis are explicitly distinguished and consented to.
 6. **Independent failure:** one failed PDF does not erase another PDF's successful output.
@@ -48,7 +49,7 @@ Objest writes per-PDF results to a marked `## Objest` section immediately after 
 - Selective English OCR with bundled Tesseract runtime and data
 - OpenAI Responses API using SecretStorage key and fixed `gpt-5.6-luna`
 - One bounded AI request per PDF; reject above fixed limits
-- Fixed English summary/tag/core-metadata schema
+- Fixed English title/summary/tag/core-metadata schema
 - One attachment at a time
 - Simple progress/cancellation modal
 - Automatic managed-section and additive-tag writes
@@ -75,7 +76,7 @@ Minimal v1 succeeds when it works end to end in the designated macOS test vault:
 - Finds direct PDF embeds and ignores unsupported references.
 - Extracts text PDFs and locally OCRs image-only PDFs.
 - Produces a schema-valid OpenAI result without sending filename/path or unrelated note data.
-- Preserves all content outside Objest markers and never removes existing tags.
+- Preserves all content outside Objest-owned callouts and never removes existing tags.
 - Reprocessing replaces rather than duplicates an attachment entry.
 - Reports bounded failures without corrupting the note or blocking unrelated PDFs.
 - Passes automated checks and an Obsidian CLI smoke test.

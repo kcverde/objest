@@ -57,7 +57,7 @@ Objest persists only:
 
 - Selected Obsidian secret identifier
 - Privacy-consent status and consent version
-- Final rendered summaries/metadata inside Objest markers
+- Final rendered titles, summaries, and metadata inside Objest-owned callouts
 - Generated tags merged into the note's standard `tags`
 
 Objest does not persist:

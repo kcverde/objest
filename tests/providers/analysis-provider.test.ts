@@ -4,6 +4,7 @@ import { FakeAnalysisProvider } from '../fakes/fake-analysis-provider';
 
 const result = createAttachmentAnalysis(
 	{
+		title: 'Synthetic document',
 		summary: 'Synthetic summary.',
 		tags: ['test'],
 		documentType: null,

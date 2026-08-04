@@ -6,7 +6,7 @@ This document defines the smallest useful first version of Objest. It intentiona
 
 ## Goal
 
-From a Markdown note in Kevin's macOS Obsidian vault, run one command that analyzes directly embedded local PDFs—especially scans—and automatically adds a short English summary, a few tags, and basic metadata without overwriting user-authored note content.
+From a Markdown note in Kevin's macOS Obsidian vault, run one command that analyzes directly embedded local PDFs—especially scans—and automatically adds a document-relevant English title, a short English summary, a few tags, and basic metadata without overwriting user-authored note content.
 
 ## Target
 
@@ -73,6 +73,7 @@ Minimal v1 rejects an attachment rather than implementing complex large-document
 | OCR languages                    |                    English only |
 | OpenAI analysis requests per PDF |                               1 |
 | Provider retries                 | 1 retry for a transient failure |
+| Generated title                  |                  120 characters |
 | Summary length                   |                2,000 characters |
 | Generated tags                   |                               7 |
 | Entities                         |                              15 |
@@ -108,8 +109,9 @@ The runtime-validated result contains only:
 
 ```ts
 interface V1AttachmentAnalysis {
-	schemaVersion: 1;
-	promptVersion: 1;
+	schemaVersion: 2;
+	promptVersion: 2;
+	title: string;
 	summary: string;
 	tags: string[];
 	documentType: string | null;
@@ -124,6 +126,7 @@ interface V1AttachmentAnalysis {
 
 Rules:
 
+- Title: a concise, specific English plain-text title grounded only in document content, 1–120 characters on one line. It must not be inferred from or rely on the attachment filename.
 - Summary: one to three concise English paragraphs, 1–2,000 characters.
 - Tags: zero to seven normalized Obsidian tags, at most 64 characters each. Three to seven are preferred when supported by the document; fewer are allowed when appropriate. Use the deterministic normalization rules in D043.
 - Document type: `null` or 1–80 characters.
@@ -139,37 +142,31 @@ Rules:
 
 ## Note output
 
-Objest owns one section immediately after YAML frontmatter, or at the file start when frontmatter is absent:
+Objest owns one native Obsidian callout per attachment immediately after YAML frontmatter, or at the file start when frontmatter is absent. Multiple callouts are contiguous and each has its own document-relevant title:
 
 ```markdown
-<!-- objest:managed:start -->
-
-## Objest
-
-<!-- objest:entry:start id="<base64url-vault-path>" -->
-
-### [[scan.pdf]]
-
-Summary text.
-
-- **Document type:** …
-- **Document date:** …
-- **Entities:** …
-- **Language:** …
-- **Processed:** …
-- **Model:** `gpt-5.6-luna`
-
-<!-- objest:entry:end -->
-<!-- objest:managed:end -->
+> [!objest] Camp Code of Conduct and Agreement
+> **Source:** [[scan.pdf]]
+>
+> Summary text.
+>
+> - **Document type:** …
+> - **Document date:** …
+> - **Entities:** …
+> - **Language:** …
+> - **Processed:** …
+> - **Model:** `gpt-5.6-luna`
 ```
 
 Persistence rules:
 
 - Render Markdown in code; never persist model-authored Markdown directly.
-- Replace only the matching attachment entry inside valid Objest markers.
-- Preserve all content outside Objest markers.
-- Parse only the exact line-oriented marker grammar in D044. Fail without writing when managed/entry markers are orphaned, duplicated, nested, out of order, have duplicate/invalid IDs, or otherwise malformed.
-- Write the managed body entry first through a conflict-aware Vault transformation.
+- New output contains no HTML ownership comments.
+- Reserve exact top-of-body `> [!objest] <title>` callouts for Objest-owned output. The exact second line, `> **Source:** [[<vault-path>]]`, is the attachment identity. The blockquote boundary is the entry boundary.
+- Replace only the callout with the matching exact source line, preserve unmatched Objest callouts, and preserve all non-Objest content outside the callouts.
+- Fail without writing when Objest callouts are malformed, duplicated by source, or appear outside the contiguous top-of-body region.
+- On the next successful attachment write, migrate an exact legacy D044 HTML-comment section to callouts and remove all legacy Objest comments. Fail closed rather than guessing if the legacy section is malformed or contains unrecognized content.
+- Write the owned body entry first through a conflict-aware Vault transformation.
 - Then add generated tags to existing frontmatter `tags` through `processFrontMatter`.
 - Never remove existing tags.
 - If tag merging fails after the body write, report the partial failure; retry can repair it.
@@ -209,7 +206,7 @@ Minimal v1 should fail safely and explain the problem, but may not recover elega
 - Ambiguous/broken embed paths
 - OpenAI outages, rate limits, invalid keys, model changes, and malformed responses
 
-These cases must not cause writes outside Objest markers or removal of user tags/content.
+These cases must not cause writes outside Objest-owned callouts or removal of user tags/content.
 
 ## Acceptance checklist
 
