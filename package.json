@@ -1,6 +1,6 @@
 {
 	"name": "objest",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"description": "Obsidian plugin that analyzes embedded PDFs and enriches notes with AI-generated summaries and metadata.",
 	"main": "main.js",
 	"type": "module",

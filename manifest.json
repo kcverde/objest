@@ -1,7 +1,7 @@
 {
 	"id": "objest",
 	"name": "Objest",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"minAppVersion": "1.11.4",
 	"description": "Analyzes embedded PDFs and enriches notes with AI-generated summaries, tags, and metadata.",
 	"author": "Objest contributors",

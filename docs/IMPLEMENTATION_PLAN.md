@@ -63,13 +63,13 @@ See [SPIKE_RESULTS.md](SPIKE_RESULTS.md).
 - Render one exact native `[!objest]` callout per attachment, with no new HTML marker comments.
 - Use the exact rendered Source wikilink line as attachment identity.
 - Render the generated title, summary, and fixed metadata in code with Markdown escaping.
-- Insert contiguous owned callouts immediately after frontmatter.
+- Insert contiguous owned callouts at the top of the note body, tolerating one blank separator after frontmatter.
 - Replace only a matching callout; leave unmatched old callouts unchanged.
-- Migrate exact legacy marker output on the next successful write and fail closed on malformed callouts or legacy markers.
+- Migrate exact legacy marker output on the next successful write, ignore callout-like text inside Markdown fenced code blocks, and fail closed on malformed callouts or legacy markers.
 - Update managed body first through a conflict-aware Vault transform.
 - Add tags second through `processFrontMatter`, preserving all existing tags/properties.
 - Do not remove tags or track generated ownership in v1.
-- Add idempotence, hostile Markdown, ownership-syntax injection, legacy migration, and partial-write tests.
+- Add idempotence, frontmatter-formatting, fenced-example, hostile Markdown, ownership-syntax injection, legacy migration, and partial-write tests.
 
 **Exit:** Repeated runs replace entries without changing user content outside owned callouts or removing existing tags.
 

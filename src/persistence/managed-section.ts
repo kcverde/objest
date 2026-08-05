@@ -148,8 +148,10 @@ export function encodePathId(path: string): string {
 function parseCalloutRegion(note: string): ParsedCalloutRegion {
 	const insertion = frontmatterInsertionOffset(note);
 	const lines = linesWithOffsets(note);
+	const fencedLines = fencedLineStarts(lines);
 	let index = lines.findIndex((line) => line.start === insertion);
 	if (index < 0) index = lines.length;
+	if (insertion > 0 && lines[index]?.text === '') index += 1;
 
 	const entries: ParsedCallout[] = [];
 	const sources = new Set<string>();
@@ -194,10 +196,11 @@ function parseCalloutRegion(note: string): ParsedCalloutRegion {
 	for (const line of lines) {
 		if (
 			line.text.startsWith('> [!objest') &&
-			!recognizedStarts.has(line.start)
+			!recognizedStarts.has(line.start) &&
+			!fencedLines.has(line.start)
 		) {
 			throw new ManagedSectionError(
-				'Objest callouts must use the exact format at the top of the note body.',
+				'Objest callouts must use the exact format in the top-of-body region.',
 			);
 		}
 	}
@@ -463,6 +466,35 @@ function linesWithOffsets(value: string): {
 		});
 	}
 	return lines;
+}
+
+function fencedLineStarts(
+	lines: readonly { start: number; text: string }[],
+): Set<number> {
+	const fenced = new Set<number>();
+	let open: { length: number; marker: '`' | '~' } | null = null;
+
+	for (const line of lines) {
+		if (open) {
+			fenced.add(line.start);
+			const closing = /^ {0,3}(`+|~+)[ \t]*$/u.exec(line.text)?.[1];
+			if (closing?.[0] === open.marker && closing.length >= open.length)
+				open = null;
+			continue;
+		}
+
+		const opening = /^ {0,3}(`{3,}|~{3,})(.*)$/u.exec(line.text);
+		const marker = opening?.[1];
+		if (!marker || (marker[0] === '`' && opening[2]!.includes('`')))
+			continue;
+		open = {
+			length: marker.length,
+			marker: marker[0] as '`' | '~',
+		};
+		fenced.add(line.start);
+	}
+
+	return fenced;
 }
 
 function escapeParagraphs(value: string): string[] {

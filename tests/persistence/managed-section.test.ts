@@ -42,6 +42,29 @@ describe('managed callout persistence', () => {
 		expect(result).not.toContain('## Objest');
 	});
 
+	it('replaces a top-of-body callout after a frontmatter blank separator', () => {
+		const existing = update('User body.\n');
+		const note = `---\ntags:\n  - research\n---\n\n${existing}`;
+		const result = update(note, 'Files/scan.pdf', {
+			...analysis,
+			title: 'Replacement title',
+		});
+
+		expect(result.match(/> \[!objest\]/gu)).toHaveLength(1);
+		expect(result).toContain('---\n\n> [!objest] Replacement title');
+		expect(result).toContain('User body.\n');
+	});
+
+	it('reruns after frontmatter is added following a no-frontmatter body write', () => {
+		const firstWrite = update('User body.\n');
+		const afterTagWrite = `---\ntags:\n  - research\n---\n\n${firstWrite}`;
+		const secondWrite = update(afterTagWrite);
+
+		expect(secondWrite).toBe(afterTagWrite);
+		expect(secondWrite.match(/> \[!objest\]/gu)).toHaveLength(1);
+		expect(secondWrite).toContain('User body.\n');
+	});
+
 	it('is idempotent, replaces only the matching callout, and keeps unmatched entries', () => {
 		const first = update('User body.\n', 'a.pdf');
 		const withSecond = update(first, 'b.pdf');
@@ -55,6 +78,42 @@ describe('managed callout persistence', () => {
 		expect(replaced).toContain('> **Source:** [[b.pdf]]');
 		expect(replaced.match(/Grounded summary\\\./gu)).toHaveLength(1);
 		expect(replaced).toContain('User body.\n');
+	});
+
+	it('ignores callout examples inside fenced code blocks', () => {
+		const note = [
+			'User body.',
+			'',
+			'```markdown',
+			'> [!objest] Example only',
+			'> **Source:** [[example.pdf]]',
+			'>',
+			'> Not managed output.',
+			'```',
+			'',
+		].join('\n');
+		const result = update(note);
+
+		expect(result).toContain('> [!objest] Research report');
+		expect(result).toContain('```markdown\n> [!objest] Example only');
+		expect(result).toContain('User body.');
+	});
+
+	it('still rejects an actual callout after a fenced example', () => {
+		const note = [
+			'User body.',
+			'',
+			'~~~markdown',
+			'> [!objest] Example only',
+			'~~~',
+			'',
+			'> [!objest] Misplaced',
+			'> **Source:** [[late.pdf]]',
+			'>',
+			'> Managed-looking output.',
+		].join('\n');
+
+		expect(() => update(note)).toThrow(ManagedSectionError);
 	});
 
 	it('escapes hostile model-authored Markdown and keeps it inside the callout', () => {

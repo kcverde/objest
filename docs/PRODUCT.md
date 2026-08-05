@@ -27,7 +27,7 @@ For each successfully processed PDF:
 - Source language when identifiable
 - Minimal provenance: processing time and model
 
-Objest writes each per-PDF result to a native `[!objest]` callout immediately after frontmatter, using the generated document title as the callout title, and merges tags into the standard `tags` property without removing existing values.
+Objest writes each per-PDF result to a native `[!objest]` callout at the top of the note body, tolerating one blank separator after frontmatter, uses the generated document title as the callout title, and merges tags into the standard `tags` property without removing existing values.
 
 ## Design principles
 

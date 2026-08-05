@@ -143,7 +143,7 @@ Rules:
 
 ## Note output
 
-Objest owns one native Obsidian callout per attachment immediately after YAML frontmatter, or at the file start when frontmatter is absent. Multiple callouts are contiguous and each has its own document-relevant title:
+Objest owns one native Obsidian callout per attachment at the top of the note body: immediately after YAML frontmatter, after one optional blank separator line following frontmatter, or at the file start when frontmatter is absent. Multiple callouts are contiguous and each has its own document-relevant title:
 
 ```markdown
 > [!objest] Camp Code of Conduct and Agreement
@@ -163,9 +163,9 @@ Persistence rules:
 
 - Render Markdown in code; never persist model-authored Markdown directly.
 - New output contains no HTML ownership comments.
-- Reserve exact top-of-body `> [!objest] <title>` callouts for Objest-owned output. The exact second line, `> **Source:** [[<vault-path>]]`, is the attachment identity. The blockquote boundary is the entry boundary.
+- Reserve exact top-of-body `> [!objest] <title>` callouts for Objest-owned output. Top-of-body recognition skips one optional blank line immediately after YAML frontmatter and ignores callout-like text inside Markdown fenced code blocks. The exact second line, `> **Source:** [[<vault-path>]]`, is the attachment identity. The blockquote boundary is the entry boundary.
 - Replace only the callout with the matching exact source line, preserve unmatched Objest callouts, and preserve all non-Objest content outside the callouts.
-- Fail without writing when Objest callouts are malformed, duplicated by source, or appear outside the contiguous top-of-body region.
+- Fail without writing when actual Objest callouts outside Markdown fenced code blocks are malformed, duplicated by source, or appear outside the contiguous top-of-body region.
 - On the next successful attachment write, migrate an exact legacy D044 HTML-comment section to callouts and remove all legacy Objest comments. Fail closed rather than guessing if the legacy section is malformed or contains unrecognized content.
 - Runtime-validate the complete analysis before rendering. Reparse each newly rendered entry and require its owned callout boundary to consume the complete rendered string before persistence.
 - Write the owned body entry first through a conflict-aware Vault transformation.

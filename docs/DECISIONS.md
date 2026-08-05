@@ -1195,7 +1195,7 @@ Render each attachment as a native Obsidian callout at the top of the note body:
 > Summary and metadata…
 ```
 
-New output contains no HTML ownership comments and no generic visible `## Objest` heading. Exact top-of-body `[!objest]` callouts are reserved as Objest-owned output. Their exact Source wikilink line is the attachment identity and their blockquote boundary is the entry boundary. Multiple entries remain contiguous.
+New output contains no HTML ownership comments and no generic visible `## Objest` heading. Exact top-of-body `[!objest]` callouts are reserved as Objest-owned output. Top-of-body recognition skips one optional blank separator line immediately after YAML frontmatter, so harmless frontmatter formatting does not orphan existing owned output, and ignores callout-like text inside Markdown fenced code blocks. Their exact Source wikilink line is the attachment identity and their blockquote boundary is the entry boundary. Multiple entries remain contiguous.
 
 On the next successful write, convert an exact D044 legacy section and all of its entries to callouts, replacing the current attachment with its new validated analysis and preserving unmatched legacy entries inside migrated callouts. Derive a readable local fallback heading from the path only for an unmatched legacy entry until that attachment is reprocessed. Remove all legacy Objest comments during that migration. Reject malformed or unrecognized legacy output rather than guessing.
 
@@ -1206,7 +1206,7 @@ On the next successful write, convert an exact D044 legacy section and all of it
 - Runtime-validate the complete analysis before rendering. Reparse every newly rendered entry and require one recognized callout whose boundary consumes the complete rendered string.
 - A source line is local note output and is never added to the OpenAI request.
 - Objest replaces only a callout with the matching exact source line, preserves unmatched callouts, and preserves all non-callout content.
-- Duplicate sources, malformed callouts, and Objest callouts outside the contiguous top-of-body region fail before body or tag writes.
+- Duplicate sources, malformed callouts, and actual Objest callouts outside Markdown fenced code blocks and the contiguous top-of-body region fail before body or tag writes.
 - The `[!objest]` callout type is an explicit visible ownership signal. User-authored content must not use that reserved callout type unless it is intended to be managed by Objest.
 - D045 supersedes D019/D042/D044 where they require hidden HTML markers, a generic `## Objest` heading, or a fixed core schema without a document title; it extends D043 with the 120-character single-line title bound. Top-of-body placement, idempotence, fail-closed writes, independent attachment handling, and D044's operation deadlines remain accepted.
 

@@ -69,7 +69,7 @@ A deterministic renderer escapes untrusted values and creates the exact native O
 For a validated attachment:
 
 1. Use a conflict-aware Vault transformation against the latest note text.
-2. Validate the contiguous top-of-body Objest callouts and exact source identity lines.
+2. Validate the contiguous top-of-body Objest callouts and exact source identity lines, tolerating one frontmatter separator line and excluding Markdown fenced code.
 3. Insert or replace only the matching callout.
 4. Preserve content outside Objest-owned callouts.
 5. Migrate exact legacy HTML-marker output to callouts; reject malformed legacy output.
